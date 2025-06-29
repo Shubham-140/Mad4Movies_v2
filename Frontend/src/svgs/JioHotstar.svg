@@ -1,0 +1,31 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <rect width="256" height="256" rx="48" fill="url(#hotstarBg)"/>
+  
+  <!-- Star silhouette -->
+  <path d="M128 32L156.4 96H224L172 138.4L200.4 202.4L128 160L55.6 202.4L84 138.4L32 96H99.6L128 32Z" fill="white"/>
+  
+  <!-- Gradient overlay for depth -->
+  <path d="M128 32L156.4 96H224L172 138.4L200.4 202.4L128 160L55.6 202.4L84 138.4L32 96H99.6L128 32Z" fill="url(#hotstarGradient)" fill-opacity="0.8"/>
+  
+  <!-- White border for crispness -->
+  <path d="M128 32L156.4 96H224L172 138.4L200.4 202.4L128 160L55.6 202.4L84 138.4L32 96H99.6L128 32Z" stroke="white" stroke-width="4" stroke-linejoin="round"/>
+  
+  <!-- Text element (scalable) -->
+  <text x="128" y="220" font-family="Arial, sans-serif" font-weight="bold" font-size="32" text-anchor="middle" fill="white">HOTSTAR</text>
+  
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="hotstarBg" x1="0" y1="0" x2="256" y2="256" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#041E42"/>
+      <stop offset="1" stop-color="#1F4E8C"/>
+    </linearGradient>
+    
+    <!-- Star gradient -->
+    <linearGradient id="hotstarGradient" x1="32" y1="32" x2="224" y2="224" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF2770"/>
+      <stop offset="0.5" stop-color="#FF4D2D"/>
+      <stop offset="1" stop-color="#FFA91B"/>
+    </linearGradient>
+  </defs>
+</svg>
