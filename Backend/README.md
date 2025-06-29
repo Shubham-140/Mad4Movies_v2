@@ -119,3 +119,5 @@ Professional Node.js backend service for Mad4Movies built with **Express.js 5.1*
 ---
 
 **Built with ❤️ using Node.js, Express.js, and MongoDB**
+
+*Part of the Mad4Movies full-stack application ecosystem*
