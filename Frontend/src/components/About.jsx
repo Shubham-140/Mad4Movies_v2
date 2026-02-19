@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 const About = () => {
   const lightMode = useSelector((state) => state.color.isDarkMode);
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
 
   const styles = {
     outerContainer: {
