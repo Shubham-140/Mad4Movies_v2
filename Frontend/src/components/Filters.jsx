@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   setGenre,
   setRuntime1,
@@ -16,76 +16,79 @@ import { useMediaQuery } from "react-responsive";
 export default function Filters() {
   const dispatch = useDispatch();
   const lightMode = useSelector((state) => state.color.isDarkMode ?? false);
-  const [localGenre, setLocalGenre] = useState([]);
-  const [localRating1, setLocalRating1] = useState("");
-  const [localRating2, setLocalRating2] = useState("");
-  const [localRuntime1, setLocalRuntime1] = useState("");
-  const [localRuntime2, setLocalRuntime2] = useState("");
-  const [localYear1, setLocalYear1] = useState("");
-  const [localYear2, setLocalYear2] = useState("");
-  const [localSortBy, setLocalSortBy] = useState("");
   const showGenre = useSelector((state) => state.movieDetails.showGenre ?? false);
-  const [localShowMovie, setLocalShowMovie] = useState("Everything");
+  const selectedGenre = useSelector(
+    (state) => state.movieDetails.selectedGenre ?? []
+  );
+  const runtime = useSelector((state) => state.movieDetails.runtime);
+  const rating = useSelector((state) => state.movieDetails.rating);
+  const selectedYear = useSelector((state) => state.movieDetails.selectedYear);
+  const sortBy = useSelector((state) => state.movieDetails.sort ?? "");
+  const showMovie = useSelector(
+    (state) => state.movieDetails.showMovie ?? "Everything"
+  );
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const isSmallMobile = useMediaQuery({ maxWidth: 374 });
   const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 1023 });
   const [mobileFilterContainer, setMobileFilterContainer] = useState(false);
 
+  const [draftRuntime1, setDraftRuntime1] = useState(runtime[0] ?? "");
+  const [draftRuntime2, setDraftRuntime2] = useState(runtime[1] ?? "");
+  const [draftRating1, setDraftRating1] = useState(rating[0] ?? "");
+  const [draftRating2, setDraftRating2] = useState(rating[1] ?? "");
+  const [draftYear1, setDraftYear1] = useState(selectedYear[0] ?? "");
+  const [draftYear2, setDraftYear2] = useState(selectedYear[1] ?? "");
+
+  useEffect(() => {
+    setDraftRuntime1(runtime[0] ?? "");
+    setDraftRuntime2(runtime[1] ?? "");
+    setDraftRating1(rating[0] ?? "");
+    setDraftRating2(rating[1] ?? "");
+    setDraftYear1(selectedYear[0] ?? "");
+    setDraftYear2(selectedYear[1] ?? "");
+  }, [runtime, rating, selectedYear]);
+
   function handleSortBy(e) {
-    const value = e.target.value;
-    setLocalSortBy(value);
-  }
-
-  function handleShowResults() {
-    dispatch(setRating1(localRating1));
-    dispatch(setRating2(localRating2));
-    dispatch(setGenre(localGenre));
-    dispatch(setRuntime1(localRuntime1));
-    dispatch(setRuntime2(localRuntime2));
-    dispatch(setYear1(localYear1));
-    dispatch(setYear2(localYear2));
-    dispatch(applySort(localSortBy));
-    dispatch(setShowMovie(localShowMovie));
-  }
-
-  function handleSetRating1(e) {
-    let value = e.target.value;
-    if (value < 0) value = 0;
-    else if (value > 10) value = 10;
-    setLocalRating1(value);
-  }
-
-  function handleSetRating2(e) {
-    let value = e.target.value;
-    if (value < 0) value = 0;
-    else if (value > 10) value = 10;
-    setLocalRating2(value);
+    dispatch(applySort(e.target.value));
   }
 
   function handleSelectGenre(genre) {
-    if (localGenre.includes(genre)) {
-      setLocalGenre((prev) => prev.filter((elem) => elem !== genre));
-    } else {
-      setLocalGenre((prev) => [...prev, genre]);
-    }
+    const next = selectedGenre.includes(genre)
+      ? selectedGenre.filter((elem) => elem !== genre)
+      : [...selectedGenre, genre];
+    dispatch(setGenre(next));
   }
 
-  const handleRuntime1 = (e) => {
-    let value = e.target.value;
-    if (value < 0) value = 0;
-    setLocalRuntime1(value);
-  };
-
-  const handleRuntime2 = (e) => {
-    setLocalRuntime2(e.target.value);
-  };
-
-  function handleSetYear1(e) {
-    setLocalYear1(e.target.value);
+  function clampRating(value) {
+    if (value === "") return value;
+    let num = Number(value);
+    if (num < 0) num = 0;
+    else if (num > 10) num = 10;
+    return String(num);
   }
 
-  function handleSetYear2(e) {
-    setLocalYear2(e.target.value);
+  function commitRuntime1() {
+    dispatch(setRuntime1(draftRuntime1));
+  }
+
+  function commitRuntime2() {
+    dispatch(setRuntime2(draftRuntime2));
+  }
+
+  function commitRating1() {
+    dispatch(setRating1(draftRating1));
+  }
+
+  function commitRating2() {
+    dispatch(setRating2(draftRating2));
+  }
+
+  function commitYear1() {
+    dispatch(setYear1(draftYear1));
+  }
+
+  function commitYear2() {
+    dispatch(setYear2(draftYear2));
   }
 
   const getMobileStyles = () => {
@@ -167,21 +170,21 @@ export default function Filters() {
       borderRadius: "20px",
       textAlign: "center",
       cursor: "pointer",
-      backgroundColor: localGenre.includes(genre)
+      backgroundColor: selectedGenre.includes(genre)
         ? lightMode
           ? "#ebf8ff"
           : "#2b6cb0"
         : lightMode
         ? "#edf2f7"
         : "#2d3748",
-      color: localGenre.includes(genre)
+      color: selectedGenre.includes(genre)
         ? lightMode
           ? "#3182ce"
           : "#ffffff"
         : lightMode
         ? "#4a5568"
         : "#a0aec0",
-      border: localGenre.includes(genre)
+      border: selectedGenre.includes(genre)
         ? lightMode
           ? "1px solid #bee3f8"
           : "1px solid #4299e1"
@@ -252,21 +255,21 @@ export default function Filters() {
     borderRadius: "20px",
     textAlign: "center",
     cursor: "pointer",
-    backgroundColor: localGenre.includes(genre)
+    backgroundColor: selectedGenre.includes(genre)
       ? lightMode
         ? "#ebf8ff"
         : "#2b6cb0"
       : lightMode
       ? "#edf2f7"
       : "#2d3748",
-    color: localGenre.includes(genre)
+    color: selectedGenre.includes(genre)
       ? lightMode
         ? "#3182ce"
         : "#ffffff"
       : lightMode
       ? "#4a5568"
       : "#a0aec0",
-    border: localGenre.includes(genre)
+    border: selectedGenre.includes(genre)
       ? lightMode
         ? "1px solid #bee3f8"
         : "1px solid #4299e1"
@@ -284,33 +287,6 @@ export default function Filters() {
         : "0 2px 5px rgba(0, 0, 0, 0.3)",
     },
   });
-
-  const buttonStyle = {
-    width: "100%",
-    padding: "14px",
-    marginTop: "30px",
-    backgroundColor: lightMode ? "#4299e1" : "#3182ce",
-    color: "white",
-    fontSize: "1rem",
-    fontWeight: "600",
-    borderRadius: "8px",
-    border: "none",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: lightMode
-      ? "0 4px 6px rgba(66, 153, 225, 0.3)"
-      : "0 4px 6px rgba(49, 130, 206, 0.3)",
-    ":hover": {
-      backgroundColor: lightMode ? "#3182ce" : "#2b6cb0",
-      transform: "translateY(-2px)",
-      boxShadow: lightMode
-        ? "0 6px 8px rgba(66, 153, 225, 0.4)"
-        : "0 6px 8px rgba(49, 130, 206, 0.4)",
-    },
-    ":active": {
-      transform: "translateY(0)",
-    },
-  };
 
   const containerStyle = getContainerStyle();
 
@@ -386,8 +362,8 @@ export default function Filters() {
               <h3 style={sectionTitleStyle}>Show Me</h3>
               <select
                 style={selectStyle}
-                onChange={(e) => setLocalShowMovie(e.target.value)}
-                value={localShowMovie}
+                onChange={(e) => dispatch(setShowMovie(e.target.value))}
+                value={showMovie}
               >
                 <option value="Everything">Everything</option>
                 <option value="Seen">Movies I have seen</option>
@@ -441,15 +417,21 @@ export default function Filters() {
                   type="number"
                   placeholder="Min"
                   style={{ ...inputStyle, width: "50%" }}
-                  value={localRuntime1}
-                  onChange={handleRuntime1}
+                  value={draftRuntime1}
+                  onChange={(e) => {
+                    let value = e.target.value;
+                    if (value !== "" && Number(value) < 0) value = "0";
+                    setDraftRuntime1(value);
+                  }}
+                  onBlur={commitRuntime1}
                 />
                 <input
                   type="number"
                   placeholder="Max"
                   style={{ ...inputStyle, width: "50%" }}
-                  value={localRuntime2}
-                  onChange={handleRuntime2}
+                  value={draftRuntime2}
+                  onChange={(e) => setDraftRuntime2(e.target.value)}
+                  onBlur={commitRuntime2}
                 />
               </div>
             </div>
@@ -463,8 +445,9 @@ export default function Filters() {
                   min="1"
                   max="10"
                   style={{ ...inputStyle, width: "50%" }}
-                  value={localRating1}
-                  onChange={handleSetRating1}
+                  value={draftRating1}
+                  onChange={(e) => setDraftRating1(clampRating(e.target.value))}
+                  onBlur={commitRating1}
                 />
                 <input
                   type="number"
@@ -472,8 +455,9 @@ export default function Filters() {
                   min="1"
                   max="10"
                   style={{ ...inputStyle, width: "50%" }}
-                  value={localRating2}
-                  onChange={handleSetRating2}
+                  value={draftRating2}
+                  onChange={(e) => setDraftRating2(clampRating(e.target.value))}
+                  onBlur={commitRating2}
                 />
               </div>
             </div>
@@ -485,15 +469,17 @@ export default function Filters() {
                   type="number"
                   placeholder="From Year"
                   style={{ ...inputStyle, width: "50%" }}
-                  value={localYear1}
-                  onChange={handleSetYear1}
+                  value={draftYear1}
+                  onChange={(e) => setDraftYear1(e.target.value)}
+                  onBlur={commitYear1}
                 />
                 <input
                   type="number"
                   placeholder="To Year"
                   style={{ ...inputStyle, width: "50%" }}
-                  value={localYear2}
-                  onChange={handleSetYear2}
+                  value={draftYear2}
+                  onChange={(e) => setDraftYear2(e.target.value)}
+                  onBlur={commitYear2}
                 />
               </div>
             </div>
@@ -503,23 +489,14 @@ export default function Filters() {
               <select
                 style={selectStyle}
                 onChange={handleSortBy}
-                value={localSortBy}
+                value={sortBy}
               >
+                <option value="">Default</option>
                 <option>Release Date (Asc)</option>
                 <option>Release Date (Desc)</option>
                 <option>Rating</option>
               </select>
             </div>
-
-            <button
-              style={buttonStyle}
-              onClick={() => {
-                handleShowResults();
-                setMobileFilterContainer(false);
-              }}
-            >
-              Apply Filters
-            </button>
           </div>
         </>
       )}
@@ -530,8 +507,8 @@ export default function Filters() {
             <h3 style={sectionTitleStyle}>Show Me</h3>
             <select
               style={selectStyle}
-              onChange={(e) => setLocalShowMovie(e.target.value)}
-              value={localShowMovie}
+              onChange={(e) => dispatch(setShowMovie(e.target.value))}
+              value={showMovie}
             >
               <option value="Everything">Everything</option>
               <option value="Seen">Movies I have seen</option>
@@ -585,15 +562,21 @@ export default function Filters() {
                 type="number"
                 placeholder="Min"
                 style={{ ...inputStyle, width: "50%" }}
-                value={localRuntime1}
-                onChange={handleRuntime1}
+                value={draftRuntime1}
+                onChange={(e) => {
+                  let value = e.target.value;
+                  if (value !== "" && Number(value) < 0) value = "0";
+                  setDraftRuntime1(value);
+                }}
+                onBlur={commitRuntime1}
               />
               <input
                 type="number"
                 placeholder="Max"
                 style={{ ...inputStyle, width: "50%" }}
-                value={localRuntime2}
-                onChange={handleRuntime2}
+                value={draftRuntime2}
+                onChange={(e) => setDraftRuntime2(e.target.value)}
+                onBlur={commitRuntime2}
               />
             </div>
           </div>
@@ -607,8 +590,9 @@ export default function Filters() {
                 min="1"
                 max="10"
                 style={{ ...inputStyle, width: "50%" }}
-                value={localRating1}
-                onChange={handleSetRating1}
+                value={draftRating1}
+                onChange={(e) => setDraftRating1(clampRating(e.target.value))}
+                onBlur={commitRating1}
               />
               <input
                 type="number"
@@ -616,8 +600,9 @@ export default function Filters() {
                 min="1"
                 max="10"
                 style={{ ...inputStyle, width: "50%" }}
-                value={localRating2}
-                onChange={handleSetRating2}
+                value={draftRating2}
+                onChange={(e) => setDraftRating2(clampRating(e.target.value))}
+                onBlur={commitRating2}
               />
             </div>
           </div>
@@ -629,15 +614,17 @@ export default function Filters() {
                 type="number"
                 placeholder="From Year"
                 style={{ ...inputStyle, width: "50%" }}
-                value={localYear1}
-                onChange={handleSetYear1}
+                value={draftYear1}
+                onChange={(e) => setDraftYear1(e.target.value)}
+                onBlur={commitYear1}
               />
               <input
                 type="number"
                 placeholder="To Year"
                 style={{ ...inputStyle, width: "50%" }}
-                value={localYear2}
-                onChange={handleSetYear2}
+                value={draftYear2}
+                onChange={(e) => setDraftYear2(e.target.value)}
+                onBlur={commitYear2}
               />
             </div>
           </div>
@@ -647,17 +634,14 @@ export default function Filters() {
             <select
               style={selectStyle}
               onChange={handleSortBy}
-              value={localSortBy}
+              value={sortBy}
             >
+              <option value="">Default</option>
               <option>Release Date (Asc)</option>
               <option>Release Date (Desc)</option>
               <option>Rating</option>
             </select>
           </div>
-
-          <button style={buttonStyle} onClick={handleShowResults}>
-            Apply Filters
-          </button>
         </div>
       )}
     </div>

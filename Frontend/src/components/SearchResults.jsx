@@ -14,6 +14,9 @@ const SearchResults = ({
   isMobile,
   setShowMobileSearchBar,
   isTablet,
+  hasMoreResults,
+  onLoadMore,
+  isLoadingMore,
 }) => {
   const lightMode = useSelector((state) => state.color.isDarkMode);
   const listRef = useRef(null);
@@ -78,7 +81,9 @@ const SearchResults = ({
         left: isMobile ? "0" : "0",
         width: isMobile ? "100%" : "100%",
         maxWidth: isMobile ? "none" : "100%",
-        maxHeight: isMobile ? "calc(100vh - 40px)" : "400px",
+        maxHeight: isMobile ? "calc(100vh - 40px)" : "440px",
+        display: "flex",
+        flexDirection: "column",
         backgroundColor: lightMode ? "#ffffff" : "#1a1a1a",
         borderRadius: isMobile ? "0" : "9px", 
         boxShadow: lightMode
@@ -101,7 +106,15 @@ const SearchResults = ({
           listStyle: "none",
           padding: 0,
           margin: 0,
-          maxHeight: isMobile ? "calc(100vh - 40px)" : "400px",
+          flex: 1,
+          minHeight: 0,
+          maxHeight: isMobile
+            ? hasMoreResults
+              ? "calc(100vh - 92px)"
+              : "calc(100vh - 40px)"
+            : hasMoreResults
+            ? "352px"
+            : "400px",
           overflowY: "auto",
         }}
       >
@@ -206,6 +219,31 @@ const SearchResults = ({
           </li>
         ))}
       </ul>
+      {hasMoreResults && (
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={onLoadMore}
+          disabled={isLoadingMore}
+          style={{
+            flexShrink: 0,
+            width: "100%",
+            padding: "12px 16px",
+            border: "none",
+            borderTop: lightMode
+              ? "1px solid rgba(0,0,0,0.08)"
+              : "1px solid rgba(255,255,255,0.1)",
+            backgroundColor: lightMode ? "#f8f9fa" : "#252525",
+            color: lightMode ? "#111" : "#fff",
+            fontSize: "14px",
+            fontWeight: "600",
+            cursor: isLoadingMore ? "wait" : "pointer",
+            opacity: isLoadingMore ? 0.7 : 1,
+          }}
+        >
+          {isLoadingMore ? "Loading..." : "Load more"}
+        </button>
+      )}
     </div>
   );
 };
@@ -231,6 +269,9 @@ SearchResults.propTypes = {
   isTablet: PropTypes.bool,
   isLoggedIn: PropTypes.bool,
   setShowMobileSearchBar: PropTypes.func,
+  hasMoreResults: PropTypes.bool,
+  onLoadMore: PropTypes.func,
+  isLoadingMore: PropTypes.bool,
 };
 
 export default SearchResults;

@@ -26,7 +26,6 @@ Mad4Movies is a professional-grade movie recommendation web application built wi
 * **Multi-Strategy Authentication**:
   * Local authentication with bcrypt password hashing
   * Google OAuth 2.0 integration via Passport.js
-  * Email verification and secure password recovery
 * **Personal Movie Management**:
   * **Watchlist** - Save movies to watch later
   * **Favorites** - Keep track of your all-time favorites  

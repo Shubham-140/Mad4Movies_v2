@@ -2,6 +2,7 @@ import MovieCard from "./MovieCard";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import { apiUrl } from "../utils/api";
 
 const UserProfile = () => {
   const [list, setList] = useState([]);
@@ -21,7 +22,7 @@ const UserProfile = () => {
   const { username } = useParams();
 
   useEffect(() => {
-    fetch(`https://mad4movies.onrender.com/user/${username}`)
+    fetch(apiUrl(`/user/${username}`))
       .then((res) => {
         return res.json();
       })

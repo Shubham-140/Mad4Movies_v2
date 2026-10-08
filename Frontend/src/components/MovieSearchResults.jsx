@@ -1,16 +1,99 @@
 import { useDispatch, useSelector } from "react-redux";
 import MovieCard from "./MovieCard";
 import Filters from "./Filters";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { setUrlQuery } from "../features/MovieDetailsSlice";
+import {
+  applySeenUnseenFilter,
+  buildDiscoverSearchParams,
+  hasDiscoverFilters,
+} from "../utils/tmdbFilters";
 
 function MovieSearchResults() {
   const [movies, setMovies] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const lightMode = useSelector((state) => state.color.isDarkMode);
   const [isLoading, setIsLoading] = useState(true);
   const { query } = useParams();
   const dispatch = useDispatch();
+  const genreList = useSelector((state) => state.movieDetails.genreList);
+  const selectedGenre = useSelector((state) => state.movieDetails.selectedGenre);
+  const runtime = useSelector((state) => state.movieDetails.runtime);
+  const rating = useSelector((state) => state.movieDetails.rating);
+  const selectedYear = useSelector((state) => state.movieDetails.selectedYear);
+  const sortBy = useSelector((state) => state.movieDetails.sort);
+  const showMovie = useSelector((state) => state.movieDetails.showMovie);
+  const watched = useSelector((state) => state.movieDetails.watched);
+
+  const genreIds = useMemo(
+    () => selectedGenre?.map((name) => genreList?.[name]).filter(Boolean) ?? [],
+    [genreList, selectedGenre]
+  );
+
+  const searchQuery = useMemo(() => {
+    if (!query) return "";
+    try {
+      return decodeURIComponent(query);
+    } catch {
+      return query;
+    }
+  }, [query]);
+
+  const useDiscover = useMemo(
+    () =>
+      hasDiscoverFilters({
+        genreIds,
+        rating,
+        runtime,
+        selectedYear,
+        sortBy,
+      }),
+    [genreIds, rating, runtime, selectedYear, sortBy]
+  );
+
+  const displayMovies = useMemo(
+    () => applySeenUnseenFilter(movies, showMovie, watched),
+    [movies, showMovie, watched]
+  );
+
+  const fetchResultsPage = useCallback(
+    async (pageToFetch) => {
+      if (!searchQuery) return null;
+
+      let url;
+      if (useDiscover) {
+        const params = buildDiscoverSearchParams({
+          genreIds,
+          rating,
+          runtime,
+          selectedYear,
+          sortBy,
+          textQuery: searchQuery,
+          page: pageToFetch,
+        });
+        url = `https://api.themoviedb.org/3/discover/movie?${params.toString()}`;
+      } else {
+        url = `https://api.themoviedb.org/3/search/movie?api_key=${
+          import.meta.env.VITE_TMDB_API_KEY
+        }&query=${encodeURIComponent(searchQuery)}&page=${pageToFetch}`;
+      }
+
+      const response = await fetch(url);
+      return response.json();
+    },
+    [
+      genreIds,
+      rating,
+      runtime,
+      searchQuery,
+      selectedYear,
+      sortBy,
+      useDiscover,
+    ]
+  );
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const isMobile = screenWidth <= 768;
   
@@ -30,19 +113,65 @@ function MovieSearchResults() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!searchQuery) return;
 
-  useEffect(() => {
-    fetch(
-      `https://api.themoviedb.org/3/search/movie?api_key=${
-        import.meta.env.VITE_TMDB_API_KEY
-      }&query=${query}`
-    )
-      .then((response) => response.json())
-      .then((data) => setMovies(data?.results || []));
-  }, [query]);
+    setIsLoading(true);
+    setMovies([]);
+    setPage(1);
+
+    fetchResultsPage(1)
+      .then((data) => {
+        setMovies(data?.results || []);
+        setPage(data?.page ?? 1);
+        setTotalPages(data?.total_pages ?? 0);
+      })
+      .finally(() => setIsLoading(false));
+  }, [searchQuery, fetchResultsPage]);
+
+  function handleLoadMore() {
+    if (isLoadingMore || !searchQuery || page >= totalPages) return;
+
+    const nextPage = page + 1;
+    setIsLoadingMore(true);
+    fetchResultsPage(nextPage)
+      .then((data) => {
+        setMovies((prev) => [...prev, ...(data?.results || [])]);
+        setPage(data?.page ?? nextPage);
+        setTotalPages(data?.total_pages ?? totalPages);
+      })
+      .finally(() => setIsLoadingMore(false));
+  }
+
+  const loadMoreButton =
+    page < totalPages ? (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginTop: "28px",
+          marginBottom: "24px",
+        }}
+      >
+        <button
+          type="button"
+          onClick={handleLoadMore}
+          disabled={isLoadingMore}
+          style={{
+            padding: "12px 28px",
+            borderRadius: "8px",
+            border: "none",
+            backgroundColor: lightMode ? "#4299e1" : "#63b3ed",
+            color: "#fff",
+            fontSize: "1rem",
+            fontWeight: "600",
+            cursor: isLoadingMore ? "wait" : "pointer",
+            opacity: isLoadingMore ? 0.75 : 1,
+          }}
+        >
+          {isLoadingMore ? "Loading..." : "Load more"}
+        </button>
+      </div>
+    ) : null;
 
   useEffect(() => {
     if (query) {
@@ -112,7 +241,7 @@ function MovieSearchResults() {
                   lineHeight: "1.6",
                 }}
               >
-                {movies?.length === 0 && "No results found"}
+                {displayMovies?.length === 0 && "No results found"}
               </p>
             </div>
 
@@ -151,7 +280,7 @@ function MovieSearchResults() {
                     Loading results...
                   </p>
                 </div>
-              ) : movies?.length > 0 ? (
+              ) : displayMovies?.length > 0 ? (
                 <div
                   style={{
                     display: "grid",
@@ -167,15 +296,15 @@ function MovieSearchResults() {
                     position: "relative",
                   }}
                 >
-                  {movies.map((elem, index) => (
+                  {displayMovies.map((elem, index) => (
                     <MovieCard
-                      key={index}
+                      key={elem.id}
                       title={elem.original_title}
                       date={elem.release_date}
                       rating={elem.vote_average}
                       image={elem.poster_path}
                       index={index}
-                      movies={movies}
+                      movies={displayMovies}
                       lightMode={lightMode}
                       isMobile={true}
                     />
@@ -209,6 +338,7 @@ function MovieSearchResults() {
                   </p>
                 </div>
               )}
+              {!isLoading && loadMoreButton}
             </div>
           </div>
         </div>
@@ -285,7 +415,7 @@ function MovieSearchResults() {
                   lineHeight: "1.6",
                 }}
               >
-                {movies?.length === 0 && "No results found"}
+                {displayMovies?.length === 0 && "No results found"}
               </p>
             </div>
 
@@ -324,7 +454,7 @@ function MovieSearchResults() {
                     Loading results...
                   </p>
                 </div>
-              ) : movies?.length > 0 ? (
+              ) : displayMovies?.length > 0 ? (
                 <div
                   style={{
                     display: "grid",
@@ -332,15 +462,15 @@ function MovieSearchResults() {
                     gap: "18px",
                   }}
                 >
-                  {movies.map((elem, index) => (
+                  {displayMovies.map((elem, index) => (
                     <MovieCard
-                      key={index}
+                      key={elem.id}
                       title={elem.original_title}
                       date={elem.release_date}
                       rating={elem.vote_average}
                       image={elem.poster_path}
                       index={index}
-                      movies={movies}
+                      movies={displayMovies}
                       lightMode={lightMode}
                       containerWidth={containerWidth}
                       isMobile={false}
@@ -375,6 +505,7 @@ function MovieSearchResults() {
                   </p>
                 </div>
               )}
+              {!isLoading && loadMoreButton}
             </div>
           </div>
         </div>

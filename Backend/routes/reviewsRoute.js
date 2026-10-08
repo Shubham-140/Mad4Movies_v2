@@ -62,15 +62,27 @@ router.post('/update/like/:reviewId', async (req, res) => {
             return res.status(404).json({ error: "Review not found" });
         }
 
-        // Remove user from opposite reaction
-        review.dislikedBy.pull(userId);
-        review.likedBy.pull(userId);
+        const alreadyLiked = review.likedBy.some(
+            (id) => String(id) === String(userId)
+        );
+        const alreadyDisliked = review.dislikedBy.some(
+            (id) => String(id) === String(userId)
+        );
 
-        // Add to the selected action
         if (action === "like") {
-            review.likedBy.addToSet(userId);
+            review.dislikedBy.pull(userId);
+            if (alreadyLiked) {
+                review.likedBy.pull(userId);
+            } else {
+                review.likedBy.addToSet(userId);
+            }
         } else {
-            review.dislikedBy.addToSet(userId);
+            review.likedBy.pull(userId);
+            if (alreadyDisliked) {
+                review.dislikedBy.pull(userId);
+            } else {
+                review.dislikedBy.addToSet(userId);
+            }
         }
 
         await review.save();
@@ -100,7 +112,7 @@ router.delete('/delete/:reviewId', async (req, res) => {
 
 router.post('/create', async (req, res) => {
     try {
-        const { userId, movieId, review } = req.body;
+        const { userId, movieId, review, name } = req.body;
 
         if (!userId || !movieId || !review) {
             return res.status(400).json({ error: "Missing required fields (userId, movieId, review)" });
@@ -108,9 +120,9 @@ router.post('/create', async (req, res) => {
 
         const newReview = new Reviews({
             userId,
-            movieId,
-            review
-            // reviewId will auto-generate if set in schema
+            movieId: Number(movieId),
+            review,
+            name: name || "",
         });
 
         await newReview.save();

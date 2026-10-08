@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { apiUrl } from "../utils/api";
 
 const initialState = {
     reviews: {},
@@ -20,7 +21,9 @@ export const fetchReviews = createAsyncThunk(
     "reviews/fetchReviews",
     async (movieId, { rejectWithValue }) => {
         try {
-            const response = await fetch(`/reviews/${movieId}`);
+            const response = await fetch(
+                apiUrl(`/reviews/${Number(movieId)}`)
+            );
             const data = await handleFetchResponse(response);
             return { movieId, reviews: data.reviews || [] };
         } catch (err) {
@@ -34,16 +37,16 @@ export const createReview = createAsyncThunk(
     async ({ movieId, review }, { getState, rejectWithValue }) => {
         try {
             const { currentUser } = getState().auth;
-            const response = await fetch("/reviews/create", {
+            const response = await fetch(apiUrl("/reviews/create"), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     userId: currentUser._id,
-                    movieId,
+                    movieId: Number(movieId),
                     review,
-                    name: currentUser.name
+                    name: currentUser.name,
                 }),
             });
             const data = await handleFetchResponse(response);
@@ -58,7 +61,7 @@ export const updateReviewText = createAsyncThunk(
     "reviews/updateReviewText",
     async ({ reviewId, newReview }, { rejectWithValue }) => {
         try {
-            const response = await fetch(`/reviews/update/review/${reviewId}`, {
+            const response = await fetch(apiUrl(`/reviews/update/review/${reviewId}`), {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -78,7 +81,7 @@ export const toggleReviewReaction = createAsyncThunk(
     async ({ reviewId, action }, { getState, rejectWithValue }) => {
         try {
             const { currentUser } = getState().auth;
-            const response = await fetch(`/reviews/update/like/${reviewId}`, {
+            const response = await fetch(apiUrl(`/reviews/update/like/${reviewId}`), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -100,7 +103,7 @@ export const deleteReview = createAsyncThunk(
     "reviews/deleteReview",
     async (reviewId, { rejectWithValue }) => {
         try {
-            const response = await fetch(`/reviews/delete/${reviewId}`, {
+            const response = await fetch(apiUrl(`/reviews/delete/${reviewId}`), {
                 method: "DELETE"
             });
             await handleFetchResponse(response);
@@ -126,8 +129,11 @@ const reviewsSlice = createSlice({
                 state.reviews[movieId] = reviews.reduce((acc, review) => {
                     acc[review.reviewId] = {
                         ...review,
-                        likedBy: review.likedBy || [],
-                        dislikedBy: review.dislikedBy || []
+                        movieId: Number(review.movieId),
+                        likedBy: (review.likedBy || []).map((id) => String(id)),
+                        dislikedBy: (review.dislikedBy || []).map((id) =>
+                            String(id)
+                        ),
                     };
                     return acc;
                 }, {});
@@ -149,8 +155,11 @@ const reviewsSlice = createSlice({
                 }
                 state.reviews[review.movieId][review.reviewId] = {
                     ...review,
-                    likedBy: [],
-                    dislikedBy: []
+                    movieId: Number(review.movieId),
+                    likedBy: (review.likedBy || []).map((id) => String(id)),
+                    dislikedBy: (review.dislikedBy || []).map((id) =>
+                        String(id)
+                    ),
                 };
                 state.status = "succeeded";
             })
@@ -184,28 +193,32 @@ const reviewsSlice = createSlice({
                         const review = state.reviews[movieId][reviewId];
                         
                         // Handle like/dislike toggle
+                        const userIdStr = String(userId);
+                        const hasLike = review.likedBy.some(
+                            (id) => String(id) === userIdStr
+                        );
+                        const hasDislike = review.dislikedBy.some(
+                            (id) => String(id) === userIdStr
+                        );
+
                         if (reactionType === "like") {
-                            // Remove from dislikes if present
-                            review.dislikedBy = review.dislikedBy.filter(id => id !== userId);
-                            
-                            // Toggle like
-                            const likeIndex = review.likedBy.indexOf(userId);
-                            if (likeIndex === -1) {
-                                review.likedBy.push(userId);
-                            } else {
-                                review.likedBy.splice(likeIndex, 1);
-                            }
+                            review.dislikedBy = review.dislikedBy.filter(
+                                (id) => String(id) !== userIdStr
+                            );
+                            review.likedBy = hasLike
+                                ? review.likedBy.filter(
+                                      (id) => String(id) !== userIdStr
+                                  )
+                                : [...review.likedBy, userId];
                         } else {
-                            // Remove from likes if present
-                            review.likedBy = review.likedBy.filter(id => id !== userId);
-                            
-                            // Toggle dislike
-                            const dislikeIndex = review.dislikedBy.indexOf(userId);
-                            if (dislikeIndex === -1) {
-                                review.dislikedBy.push(userId);
-                            } else {
-                                review.dislikedBy.splice(dislikeIndex, 1);
-                            }
+                            review.likedBy = review.likedBy.filter(
+                                (id) => String(id) !== userIdStr
+                            );
+                            review.dislikedBy = hasDislike
+                                ? review.dislikedBy.filter(
+                                      (id) => String(id) !== userIdStr
+                                  )
+                                : [...review.dislikedBy, userId];
                         }
                         break;
                     }

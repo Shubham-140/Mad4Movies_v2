@@ -1,12 +1,19 @@
 import { useSelector } from "react-redux";
 import Filters from "./Filters";
 import MovieCard from "./MovieCard";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
+import {
+  applySeenUnseenFilter,
+  buildDiscoverSearchParams,
+} from "../utils/tmdbFilters";
 
 function GenreFilteredMoviesCards() {
   const lightMode = useSelector((state) => state.color.isDarkMode);
   const [list, setList] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const genreList = useSelector((state) => state.movieDetails.genreList);
   const runtime = useSelector((state) => state.movieDetails.runtime);
   const selectedYear = useSelector((state) => state.movieDetails.selectedYear);
@@ -36,85 +43,95 @@ function GenreFilteredMoviesCards() {
 
   const id = Number(genreId);
 
+  const fetchGenrePage = useCallback(
+    async (pageToFetch) => {
+      if (!id || Number.isNaN(id)) return null;
+
+      const params = buildDiscoverSearchParams({
+        genreIds: [id],
+        rating,
+        runtime,
+        selectedYear,
+        sortBy,
+        page: pageToFetch,
+      });
+      const response = await fetch(
+        `https://api.themoviedb.org/3/discover/movie?${params.toString()}`
+      );
+      return response.json();
+    },
+    [id, rating, runtime, selectedYear, sortBy]
+  );
+
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true); 
-      try {
-        const response = await fetch(
-          `https://api.themoviedb.org/3/discover/movie?api_key=${
-            import.meta.env.VITE_TMDB_API_KEY
-          }&with_genres=${id}`
-        );
-        const data = await response.json();
-        let allMovies = data?.results || [];
+    if (!id || Number.isNaN(id)) return;
 
-        const moviesWithRuntime = await Promise.all(
-          allMovies.map(async (movie) => {
-            const detailsRes = await fetch(
-              `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${
-                import.meta.env.VITE_TMDB_API_KEY
-              }`
-            );
-            const detailsData = await detailsRes.json();
-            return { ...movie, runtime: detailsData.runtime || 0 };
-          })
-        );
+    setIsLoading(true);
+    setList([]);
+    setPage(1);
 
-        let filteredMovies = moviesWithRuntime.filter((movie) => {
-          return (
-            (!rating[0] || movie.vote_average >= Number(rating[0])) &&
-            (!rating[1] || movie.vote_average <= Number(rating[1])) &&
-            (!runtime[0] || movie.runtime >= Number(runtime[0])) &&
-            (!runtime[1] || movie.runtime <= Number(runtime[1])) &&
-            (!selectedYear[0] ||
-              (movie.release_date &&
-                movie.release_date.slice(0, 4) >= Number(selectedYear[0]))) &&
-            (!selectedYear[1] ||
-              (movie.release_date &&
-                movie.release_date.slice(0, 4) <= Number(selectedYear[1])))
-          );
-        });
+    fetchGenrePage(1)
+      .then((data) => {
+        setList(data?.results || []);
+        setPage(data?.page ?? 1);
+        setTotalPages(data?.total_pages ?? 0);
+      })
+      .catch(() => console.log(""))
+      .finally(() => setIsLoading(false));
+  }, [id, fetchGenrePage]);
 
-        if (sortBy === "Release Date (Asc)") {
-          filteredMovies.sort(
-            (a, b) =>
-              new Date(a.release_date || "1900-01-01") -
-              new Date(b.release_date || "1900-01-01")
-          );
-        } else if (sortBy === "Release Date (Desc)") {
-          filteredMovies.sort(
-            (a, b) =>
-              new Date(b.release_date || "1900-01-01") -
-              new Date(a.release_date || "1900-01-01")
-          );
-        } else if (sortBy === "Rating") {
-          filteredMovies.sort(
-            (a, b) => (b.vote_average || 0) - (a.vote_average || 0)
-          );
-        }
+  function handleLoadMore() {
+    if (isLoadingMore || page >= totalPages) return;
 
-        if (showMovie === "Seen") {
-          filteredMovies = filteredMovies.filter((movie) =>
-            watched.includes(movie.id)
-          );
-        } else if (showMovie === "Unseen") {
-          filteredMovies = filteredMovies.filter(
-            (movie) => !watched.includes(movie.id)
-          );
-        }
+    const nextPage = page + 1;
+    setIsLoadingMore(true);
+    fetchGenrePage(nextPage)
+      .then((data) => {
+        setList((prev) => [...prev, ...(data?.results || [])]);
+        setPage(data?.page ?? nextPage);
+        setTotalPages(data?.total_pages ?? totalPages);
+      })
+      .catch(() => console.log(""))
+      .finally(() => setIsLoadingMore(false));
+  }
 
-        setList(filteredMovies);
-      } catch {
-        console.log("");
-      } finally {
-        setIsLoading(false); 
-      }
-    };
-
-    fetchData();
-  }, [id, runtime, selectedYear, rating, sortBy, watched, showMovie]);
+  const displayList = useMemo(
+    () => applySeenUnseenFilter(list, showMovie, watched),
+    [list, showMovie, watched]
+  );
 
   const genreName = Object.keys(genreList).find((key) => genreList[key] === id);
+
+  const loadMoreButton =
+    page < totalPages ? (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginTop: "28px",
+          marginBottom: "24px",
+        }}
+      >
+        <button
+          type="button"
+          onClick={handleLoadMore}
+          disabled={isLoadingMore}
+          style={{
+            padding: "12px 28px",
+            borderRadius: "8px",
+            border: "none",
+            backgroundColor: lightMode ? "#4299e1" : "#63b3ed",
+            color: "#fff",
+            fontSize: "1rem",
+            fontWeight: "600",
+            cursor: isLoadingMore ? "wait" : "pointer",
+            opacity: isLoadingMore ? 0.75 : 1,
+          }}
+        >
+          {isLoadingMore ? "Loading..." : "Load more"}
+        </button>
+      </div>
+    ) : null;
 
   return (
     <div>
@@ -188,7 +205,7 @@ function GenreFilteredMoviesCards() {
                   }}
                 >
                 </div>
-              ) : list.length > 0 ? (
+              ) : displayList.length > 0 ? (
                 <div
                   style={{
                     display: "grid",
@@ -204,7 +221,7 @@ function GenreFilteredMoviesCards() {
                     position: "relative",
                   }}
                 >
-                  {list.map((elem, index) => (
+                  {displayList.map((elem, index) => (
                     <MovieCard
                       key={elem.id}
                       title={elem.title}
@@ -212,7 +229,7 @@ function GenreFilteredMoviesCards() {
                       rating={elem.vote_average}
                       image={elem.poster_path}
                       index={index}
-                      movies={list}
+                      movies={displayList}
                       lightMode={lightMode}
                       isMobile={true}
                     />
@@ -231,8 +248,10 @@ function GenreFilteredMoviesCards() {
                     textAlign: "center",
                   }}
                 >
+                  <p>No movies found matching your filters</p>
                 </div>
               )}
+              {!isLoading && loadMoreButton}
             </div>
           </div>
         </div>
@@ -319,7 +338,7 @@ function GenreFilteredMoviesCards() {
                   }}
                 >
                 </div>
-              ) : list.length > 0 ? (
+              ) : displayList.length > 0 ? (
                 <div
                   style={{
                     display: "grid",
@@ -327,7 +346,7 @@ function GenreFilteredMoviesCards() {
                     gap: "18px",
                   }}
                 >
-                  {list.map((elem, index) => (
+                  {displayList.map((elem, index) => (
                     <MovieCard
                       key={elem.id}
                       title={elem.title}
@@ -335,7 +354,7 @@ function GenreFilteredMoviesCards() {
                       rating={elem.vote_average}
                       image={elem.poster_path}
                       index={index}
-                      movies={list}
+                      movies={displayList}
                       lightMode={lightMode}
                       containerWidth={containerWidth}
                       isMobile={false}
@@ -355,8 +374,10 @@ function GenreFilteredMoviesCards() {
                     textAlign: "center",
                   }}
                 >
+                  <p>No movies found matching your filters</p>
                 </div>
               )}
+              {!isLoading && loadMoreButton}
             </div>
           </div>
         </div>

@@ -1279,15 +1279,13 @@ const PersonProfile = () => {
                   movies={topMovies}
                   lightMode={lightMode}
                   isMobile={isMobile}
-                  containerWidth={containerWidth}
-                  style={{
-                    flex: "0 0 auto",
-                    width: isMobile
-                      ? "120px"
+                  cardWidth={
+                    isMobile
+                      ? 120
                       : window.innerWidth < 1024
-                      ? "160px"
-                      : "180px",
-                  }}
+                      ? 160
+                      : 180
+                  }
                 />
               ))}
             </div>

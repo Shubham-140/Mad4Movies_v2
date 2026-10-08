@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
 import { toggleMode } from "../features/ColorSlice";
 import { motion, AnimatePresence } from "framer-motion";
-import { handleLogout } from "../features/AuthSlice";
+import { logoutUser } from "../features/authLogout";
 
 const Sidebar = ({ setOpenSidebar, openSidebar, sidebarRef }) => {
   const sideRef = useRef();
@@ -96,7 +96,7 @@ const Sidebar = ({ setOpenSidebar, openSidebar, sidebarRef }) => {
   };
 
   async function handleUserLogout() {
-    dispatch(handleLogout());
+    dispatch(logoutUser());
     localStorage.removeItem("auth_token");
     window.location.reload();
   }

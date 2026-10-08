@@ -64,7 +64,7 @@ Modern React 19 frontend application built with **Vite 6.1** featuring cutting-e
 * **Social Features** - Rating, reviews, and sharing capabilities
 
 ### **User Interface Components**
-* **Authentication Forms** - Login, register, forgot password flows
+* **Authentication Forms** - Login and register
 * **Profile Management** - Editable user profiles with image upload
 * **Watchlist Interface** - Drag-and-drop movie organization
 * **Rating System** - Interactive star rating components

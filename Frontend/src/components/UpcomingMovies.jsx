@@ -36,6 +36,7 @@ function UpcomingMovies() {
   return (
     <div
       style={{
+        width: "100%",
         display: isMobile ? "block" : "flex",
         backgroundColor: lightMode ? "#f0f4ff" : "#232A35",
         minHeight: "100vh",
@@ -94,6 +95,7 @@ function UpcomingMovies() {
       <div
         style={{
           flex: 1,
+          minWidth: 0,
           position: "relative",
           zIndex: 1,
         }}
@@ -135,26 +137,11 @@ function UpcomingMovies() {
         </div>
 
         <div style={{ position: "relative", minHeight: "500px" }}>
-          {!isMobile ? (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(5, 1fr)",
-                gap: "18px",
-              }}
-            >
-              <MovieCards 
-                type={"upcoming"}
-                isGridLayout={true}
-                containerWidth={containerWidth}
-              />
-            </div>
-          ) : (
-            <MovieCards 
-              type={"upcoming"}
-              isGridLayout={false}
-            />
-          )}
+          <MovieCards
+            type={"upcoming"}
+            isGridLayout={!isMobile}
+            containerWidth={containerWidth}
+          />
         </div>
       </div>
     </div>

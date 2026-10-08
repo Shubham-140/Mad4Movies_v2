@@ -113,7 +113,7 @@ function Trending() {
   return (
     <div
       style={{
-        maxWidth: "1440px",
+        width: "100%",
         ...getContainerStyles(),
         backgroundColor: lightMode ? "#f0f4ff" : "#232A35",
         color: lightMode ? "#222" : "orange",

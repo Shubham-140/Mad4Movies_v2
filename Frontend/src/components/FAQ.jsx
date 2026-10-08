@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { cancelFAQSubmittedPrompt, setShowFAQ } from "../features/FAQSlice";
 import AddFAQ from "./AddFAQ";
 import FAQSubmittedPrompt from "./FAQSubmittedPrompt";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 
 function FAQ() {
@@ -11,36 +11,37 @@ function FAQ() {
   const showFAQ = useSelector((state) => state.faq.showFAQ);
   const isFaqSubmitted = useSelector((state) => state.faq.isFaqSubmitted);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
   const isMobile = useMediaQuery({ maxWidth: 767 });
-  const isSmallMobile = useMediaQuery({ maxWidth: 374 }); 
+  const isSmallMobile = useMediaQuery({ maxWidth: 374 });
 
-  const faqs = [
-    {
-      q: "How do I search for a movie?",
-      a: "You can search for a movie by typing its title in the search bar. Our system will fetch relevant results based on your query.",
-    },
-    {
-      q: "Can I filter movies by genre or release year?",
-      a: "Yes! You can refine your search by selecting genres, release years, or other filters available in the app.",
-    },
-    {
-      q: "Is there a way to create a personal watchlist or save favorite movies for later?",
-      a: "Absolutely! Our app allows you to create a personalized watchlist where you can save your favorite movies and access them anytime. This feature is especially useful for keeping track of movies you want to watch later. Simply click the 'Add to Watchlist' button on any movie, and it will be saved in your profile.",
-    },
-    {
-      q: "Where do you get movie data from?",
-      a: "We fetch movie details from a reliable third-party API that provides up-to-date information on films, actors, and ratings.",
-    },
-    {
-      q: "How accurate are the ratings and reviews?",
-      a: "Ratings and reviews are sourced from trusted databases and user feedback, ensuring accuracy and credibility.",
-    },
-    {
-      q: "Can I get detailed information about a movie, including cast, reviews?",
-      a: "Yes! When you search for a movie, you can click on it to view detailed information such as the plot summary, cast members, director, release year, ratings from various sources, and user reviews.",
-    },
-  ];
+  const faqs = useMemo(() => {
+    return [
+      {
+        q: "How do I search for a movie?",
+        a: "You can search for a movie by typing its title in the search bar. Our system will fetch relevant results based on your query.",
+      },
+      {
+        q: "Can I filter movies by genre or release year?",
+        a: "Yes! You can refine your search by selecting genres, release years, or other filters available in the app.",
+      },
+      {
+        q: "Is there a way to create a personal watchlist or save favorite movies for later?",
+        a: "Absolutely! Our app allows you to create a personalized watchlist where you can save your favorite movies and access them anytime. This feature is especially useful for keeping track of movies you want to watch later. Simply click the 'Add to Watchlist' button on any movie, and it will be saved in your profile.",
+      },
+      {
+        q: "Where do you get movie data from?",
+        a: "We fetch movie details from a reliable third-party API that provides up-to-date information on films, actors, and ratings.",
+      },
+      {
+        q: "How accurate are the ratings and reviews?",
+        a: "Ratings and reviews are sourced from trusted databases and user feedback, ensuring accuracy and credibility.",
+      },
+      {
+        q: "Can I get detailed information about a movie, including cast, reviews?",
+        a: "Yes! When you search for a movie, you can click on it to view detailed information such as the plot summary, cast members, director, release year, ratings from various sources, and user reviews.",
+      },
+    ]
+  })
 
   useEffect(() => {
     const handleResize = () => {
@@ -196,9 +197,9 @@ function FAQ() {
     <div style={{ position: "relative" }}>
       <div
         style={{
-          maxWidth: "1440px",
+          maxWidth: "100%",
           ...getContainerStyles(),
-          ...mobileStyles.container, 
+          ...mobileStyles.container,
           backgroundColor: lightMode ? "#f0f4ff" : "#232A35",
           color: lightMode ? "#222" : "orange",
           boxShadow: lightMode
@@ -248,8 +249,8 @@ function FAQ() {
             paddingLeft: isMobile
               ? "15px"
               : windowWidth < 1024
-              ? "18px"
-              : "20px",
+                ? "18px"
+                : "20px",
             width: "100%",
             boxSizing: "border-box",
           }}
@@ -274,14 +275,14 @@ function FAQ() {
               width: "100%",
               paddingRight: "20px",
               margin: 0,
-              paddingBottom: "8px", 
+              paddingBottom: "8px",
             }}
           >
             Frequently Asked Questions
             <span
               style={{
                 position: "absolute",
-                bottom: "4px", 
+                bottom: "4px",
                 left: "0",
                 width: isMobile ? "50px" : getUnderlineStyles().width,
                 height: "4px",
@@ -296,7 +297,7 @@ function FAQ() {
         <div
           style={{
             width: "100%",
-            maxWidth: "1200px",
+            maxWidth: "100%",
             maxHeight: isMobile ? (isSmallMobile ? "350px" : "400px") : "500px",
             overflowY: "auto",
             marginLeft: windowWidth >= 1024 ? "20px" : "0px",
@@ -400,9 +401,8 @@ function FAQ() {
                 </summary>
                 <div
                   style={{
-                    padding: `0 ${
-                      isMobile ? (isSmallMobile ? "15px" : "20px") : "25px"
-                    } ${isMobile ? (isSmallMobile ? "12px" : "15px") : "20px"}`,
+                    padding: `0 ${isMobile ? (isSmallMobile ? "15px" : "20px") : "25px"
+                      } ${isMobile ? (isSmallMobile ? "12px" : "15px") : "20px"}`,
                     color: lightMode ? "#4a5568" : "#cbd5e0",
                     fontSize: isMobile
                       ? isSmallMobile
@@ -436,8 +436,8 @@ function FAQ() {
                 ? "0 6px"
                 : "0 8px"
               : windowWidth < 1024
-              ? "0 10px"
-              : "0 10px",
+                ? "0 10px"
+                : "0 10px",
           }}
         >
           <p
@@ -448,8 +448,8 @@ function FAQ() {
                   ? "13px"
                   : "14px"
                 : windowWidth < 1024
-                ? "15px"
-                : "16px",
+                  ? "15px"
+                  : "16px",
               marginBottom: isMobile ? "12px" : "15px",
               fontFamily: "'Poppins', sans-serif",
             }}
@@ -467,8 +467,8 @@ function FAQ() {
                   ? "13px"
                   : "14px"
                 : windowWidth < 1024
-                ? "16px"
-                : "18px",
+                  ? "16px"
+                  : "18px",
               fontWeight: "600",
               cursor: "pointer",
               padding: isMobile

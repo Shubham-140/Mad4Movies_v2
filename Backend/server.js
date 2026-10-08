@@ -13,14 +13,32 @@ const { generateToken, jwtAuthMiddleware } = require('./jwt'); // Import jwtAuth
 // app.use(session({ ... }));
 
 const cors = require('cors');
+
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://mad4movies.vercel.app',
+    process.env.FRONTEND_URL,
+].filter(Boolean);
+
 const corsOptions = {
-    origin: process.env.NODE_ENV === 'production'
-        ? 'https://mad4movies.vercel.app'
-        : 'http://localhost:5173',
+    origin(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+            return;
+        }
+        callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
+
+function resolveFrontendReturnUrl(candidate) {
+    if (candidate && allowedOrigins.includes(candidate)) {
+        return candidate;
+    }
+    return process.env.FRONTEND_URL || 'https://mad4movies.vercel.app';
+}
 
 const passport = require('./passport');
 app.use(passport.initialize());
@@ -28,17 +46,21 @@ app.use(passport.initialize());
 // app.use(passport.session());
 
 // Google OAuth Routes
-app.get('/auth/google', passport.authenticate('google', {
-    scope: ['profile', 'email'],
-    session: false // Disable sessions
-}));
+app.get('/auth/google', (req, res, next) => {
+    const returnTo = resolveFrontendReturnUrl(req.query.returnTo);
+    passport.authenticate('google', {
+        scope: ['profile', 'email'],
+        session: false,
+        state: returnTo,
+    })(req, res, next);
+});
 
-// Updated Google callback route
 app.get('/auth/google/callback',
     passport.authenticate('google', { session: false }),
     (req, res) => {
-        const token = generateToken(req.user); // Generate JWT
-        res.redirect(`https://mad4movies.vercel.app?token=${token}`); 
+        const token = generateToken(req.user);
+        const returnTo = resolveFrontendReturnUrl(req.query.state);
+        res.redirect(`${returnTo}?token=${encodeURIComponent(token)}`);
     }
 );
 

@@ -11,6 +11,9 @@ function SearchBar() {
   const searchRef = useRef();
   const [backupDisplayQuery, setBackupDisplayQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [searchPage, setSearchPage] = useState(1);
+  const [searchTotalPages, setSearchTotalPages] = useState(0);
+  const [isLoadingMoreSearch, setIsLoadingMoreSearch] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [query, setQuery] = useState("");
@@ -94,19 +97,56 @@ function SearchBar() {
 
   useEffect(() => {
     function fetchSearchResults() {
+      if (!query.trim()) {
+        setSearchResults([]);
+        setSearchPage(1);
+        setSearchTotalPages(0);
+        return;
+      }
+
       fetch(
         `https://api.themoviedb.org/3/search/movie?api_key=${
           import.meta.env.VITE_TMDB_API_KEY
-        }&query=${query}`
+        }&query=${encodeURIComponent(query)}&page=1`
       )
         .then((response) => response?.json())
-        .then((data) => setSearchResults(data?.results || []))
+        .then((data) => {
+          setSearchResults(data?.results || []);
+          setSearchPage(data?.page ?? 1);
+          setSearchTotalPages(data?.total_pages ?? 0);
+        })
         .catch(() => console.error(""));
     }
 
     const timer = setTimeout(() => fetchSearchResults(), 400);
     return () => clearTimeout(timer);
   }, [query]);
+
+  function handleLoadMoreSearch() {
+    if (
+      isLoadingMoreSearch ||
+      !query.trim() ||
+      searchPage >= searchTotalPages
+    ) {
+      return;
+    }
+
+    const nextPage = searchPage + 1;
+    setIsLoadingMoreSearch(true);
+    fetch(
+      `https://api.themoviedb.org/3/search/movie?api_key=${
+        import.meta.env.VITE_TMDB_API_KEY
+      }&query=${encodeURIComponent(query)}&page=${nextPage}`
+    )
+      .then((response) => response?.json())
+      .then((data) => {
+        setSearchResults((prev) => [...prev, ...(data?.results || [])]);
+        setSearchPage(data?.page ?? nextPage);
+        setSearchTotalPages(data?.total_pages ?? searchTotalPages);
+      })
+      .catch(() => console.error(""))
+      .finally(() => setIsLoadingMoreSearch(false));
+  }
 
   function handleQueryChange(e) {
     setDisplayQuery(e.target.value);
@@ -313,6 +353,9 @@ function SearchBar() {
             isTablet={isTablet}
             isLoggedIn={isLoggedIn}
             setShowMobileSearchBar={setShowMobileSearchBar}
+            hasMoreResults={searchPage < searchTotalPages}
+            onLoadMore={handleLoadMoreSearch}
+            isLoadingMore={isLoadingMoreSearch}
           />
         )}
       </div>
@@ -403,6 +446,9 @@ function SearchBar() {
           isTablet={isTablet}
           isLoggedIn={isLoggedIn}
           setShowMobileSearchBar={setShowMobileSearchBar}
+          hasMoreResults={searchPage < searchTotalPages}
+          onLoadMore={handleLoadMoreSearch}
+          isLoadingMore={isLoadingMoreSearch}
         />
       )}
     </div>

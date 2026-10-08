@@ -173,10 +173,17 @@ export const MovieDetailsSlice = createSlice({
             state.watched = action.payload;
         },
         loadAllRecentlyViewed: (state, action) => {
-            state.watched = action.payload;
+            state.recentlyViewed = action.payload;
+        },
+        resetPersonalMovieData: (state) => {
+            state.favorites = [];
+            state.watchList = [];
+            state.watched = [];
+            state.recentlyViewed = [];
+            state.userRating = {};
         },
     }
 })
 
-export const { setMovie, setMovieResultData, setGenre, setRuntime1, setRuntime2, setRating1, setRating2, toggleWatchedMovies, toggleFavoriteMovies, toggleWatchList, setUserRating, setArtist, setYear1, setYear2, applySort, setSingleGenre, setShowGenre, setShowMovie, incrementIndex, decrementIndex, setRecentlyViewed, setShowShare, setMovieId, setUrlQuery, setMovieDetailsHydated, loadAllFavorites, loadAllWatchList, loadAllWatched, loadAllRecentlyViewed } = MovieDetailsSlice.actions;
+export const { setMovie, setMovieResultData, setGenre, setRuntime1, setRuntime2, setRating1, setRating2, toggleWatchedMovies, toggleFavoriteMovies, toggleWatchList, setUserRating, setArtist, setYear1, setYear2, applySort, setSingleGenre, setShowGenre, setShowMovie, incrementIndex, decrementIndex, setRecentlyViewed, setShowShare, setMovieId, setUrlQuery, setMovieDetailsHydated, loadAllFavorites, loadAllWatchList, loadAllWatched, loadAllRecentlyViewed, resetPersonalMovieData } = MovieDetailsSlice.actions;
 export default MovieDetailsSlice.reducer;

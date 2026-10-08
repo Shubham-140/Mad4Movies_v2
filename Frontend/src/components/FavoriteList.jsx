@@ -1,12 +1,14 @@
 import Filters from "./Filters";
 import { useSelector } from "react-redux";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import MovieCard from "./MovieCard";
+import { fetchTmdbMoviesByIds } from "../utils/tmdb";
+import { filterSavedMovies } from "../utils/tmdbFilters";
 
 function FavoriteList() {
   const lightMode = useSelector((state) => state.color.isDarkMode);
   const favorites = useSelector((state) => state.movieDetails.favorites);
-  const [list, setList] = useState([]);
+  const [movies, setMovies] = useState([]);
   const [genre, setGenre] = useState([]);
   const runtime = useSelector((state) => state.movieDetails.runtime);
   const rating = useSelector((state) => state.movieDetails.rating);
@@ -19,19 +21,12 @@ function FavoriteList() {
     (state) => state.movieDetails.selectedGenre
   );
   const [isLoading, setIsLoading] = useState(false);
-  const isMobile = window.innerWidth <= 768;
-
-  const [containerWidth, setContainerWidth] = useState(0);
-  const containerRef = useRef(null);
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+  const isMobile = screenWidth <= 768;
+  const cardWidth = screenWidth < 1024 ? 130 : 140;
 
   useEffect(() => {
-    const updateWidth = () => {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.clientWidth);
-      }
-    };
-
-    updateWidth();
+    const updateWidth = () => setScreenWidth(window.innerWidth);
     window.addEventListener("resize", updateWidth);
     return () => window.removeEventListener("resize", updateWidth);
   }, []);
@@ -41,82 +36,40 @@ function FavoriteList() {
   }, [genreList, selectedGenre]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const result = await Promise.all(
-          favorites.map((id) =>
-            fetch(
-              `https://api.themoviedb.org/3/movie/${id}?api_key=${
-                import.meta.env.VITE_TMDB_API_KEY
-              }`
-            ).then((response) => response.json())
-          )
-        );
+    if (!favorites.length) {
+      setMovies([]);
+      return;
+    }
 
-        const allMovies = [...result];
+    let cancelled = false;
+    setIsLoading(true);
 
-        let filteredMovies = allMovies
-          .map((movie) => ({
-            ...movie,
-            genre_ids: movie.genres?.map((genre) => genre.id) || [],
-          }))
-          .filter(
-            (movie) =>
-              (!genre.length ||
-                movie.genre_ids.some((g) => genre.includes(g))) &&
-              (!rating[0] || movie.vote_average >= Number(rating[0])) &&
-              (!rating[1] || movie.vote_average <= Number(rating[1])) &&
-              (!runtime[0] || movie.runtime >= Number(runtime[0])) &&
-              (!runtime[1] || movie.runtime <= Number(runtime[1])) &&
-              (!selectedYear[0] ||
-                movie.release_date.slice(0, 4) >= Number(selectedYear[0])) &&
-              (!selectedYear[1] ||
-                movie.release_date.slice(0, 4) <= Number(selectedYear[1]))
-          );
+    fetchTmdbMoviesByIds(favorites)
+      .then((data) => {
+        if (!cancelled) setMovies(data);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
 
-        if (sortBy === "Release Date (Asc)") {
-          filteredMovies.sort(
-            (a, b) => new Date(a.release_date) - new Date(b.release_date)
-          );
-        } else if (sortBy === "Release Date (Desc)") {
-          filteredMovies.sort(
-            (a, b) => new Date(b.release_date) - new Date(a.release_date)
-          );
-        } else if (sortBy === "Rating") {
-          filteredMovies.sort((a, b) => b.vote_average - a.vote_average);
-        }
-
-        if (showMovie === "Seen") {
-          filteredMovies = filteredMovies.filter((movie) =>
-            watched.includes(movie.id)
-          );
-        } else if (showMovie === "Unseen") {
-          filteredMovies = filteredMovies.filter(
-            (movie) => !watched.includes(movie.id)
-          );
-        }
-
-        setList(filteredMovies);
-      } catch {
-        console.log("");
-      } finally {
-        setIsLoading(false);
-      }
+    return () => {
+      cancelled = true;
     };
+  }, [favorites]);
 
-    if (favorites.length) fetchData();
-    else setList([]);
-  }, [
-    favorites,
-    genre,
-    runtime,
-    selectedYear,
-    rating,
-    sortBy,
-    showMovie,
-    watched,
-  ]);
+  const list = useMemo(
+    () =>
+      filterSavedMovies(movies, {
+        genreIds: genre,
+        rating,
+        runtime,
+        selectedYear,
+        sortBy,
+        showMovie,
+        watched,
+      }),
+    [movies, genre, rating, runtime, selectedYear, sortBy, showMovie, watched]
+  );
 
   return (
     <div>
@@ -303,7 +256,6 @@ function FavoriteList() {
               position: "relative",
               zIndex: 1,
             }}
-            ref={containerRef}
           >
             <div style={{ marginBottom: "40px", position: "relative" }}>
               <h1
@@ -339,7 +291,7 @@ function FavoriteList() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(5, 1fr)",
+                    gridTemplateColumns: `repeat(auto-fill, ${cardWidth}px)`,
                     gap: "18px",
                   }}
                 >
@@ -353,8 +305,8 @@ function FavoriteList() {
                       index={index}
                       movies={list}
                       lightMode={lightMode}
-                      containerWidth={containerWidth}
                       isMobile={false}
+                      cardWidth={cardWidth}
                     />
                   ))}
                 </div>

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { handleLogout } from "../features/AuthSlice";
+import { logoutUser } from "../features/authLogout";
 
 function ProfileMenu() {
   const lightMode = useSelector((state) => state.color.isDarkMode);
@@ -96,7 +96,7 @@ function ProfileMenu() {
               },
             }}
             onClick={() => {
-              dispatch(handleLogout());
+              dispatch(logoutUser());
               localStorage.removeItem("auth_token");
               window.location.reload();
             }}

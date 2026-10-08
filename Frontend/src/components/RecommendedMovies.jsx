@@ -36,6 +36,7 @@ function RecommendedMovies() {
   return (
     <div
       style={{
+        width: "100%",
         display: isMobile ? "block" : "flex",
         backgroundColor: lightMode ? "#f0f4ff" : "#232A35",
         minHeight: "100vh",
@@ -94,6 +95,7 @@ function RecommendedMovies() {
       <div
         style={{
           flex: 1,
+          minWidth: 0,
           position: "relative",
           zIndex: 1,
         }}
@@ -135,28 +137,12 @@ function RecommendedMovies() {
         </div>
 
         <div style={{ position: "relative", minHeight: "500px" }}>
-          {!isMobile ? (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(5, 1fr)",
-                gap: "18px",
-              }}
-            >
-              <MovieCards 
-                discover={true} 
-                sort={"&sort_by=popularity.desc"}
-                isGridLayout={true}
-                containerWidth={containerWidth}
-              />
-            </div>
-          ) : (
-            <MovieCards 
-              discover={true}
-              sort={"&sort_by=popularity.desc"}
-              isGridLayout={false}
-            />
-          )}
+          <MovieCards
+            discover={true}
+            sort={"&sort_by=popularity.desc"}
+            isGridLayout={!isMobile}
+            containerWidth={containerWidth}
+          />
         </div>
       </div>
     </div>

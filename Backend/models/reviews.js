@@ -14,6 +14,10 @@ const reviewsSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    name: {
+        type: String,
+        default: "",
+    },
     movieId: {
         type: Number,
         required: true,

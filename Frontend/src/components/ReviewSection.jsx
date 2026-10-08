@@ -27,6 +27,7 @@ function ReviewSection() {
   const [editedReviewId, setEditedReviewId] = useState(null);
   const [isTextAreaFocused, setIsTextAreaFocused] = useState(false);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const currentUserId = currentUser?._id ? String(currentUser._id) : null;
 
   // Get reviews from Redux store
   const reviews = useSelector((state) =>
@@ -368,7 +369,7 @@ function ReviewSection() {
                   }}
                 >
                   <img
-                    src={`https://dummyimage.com/150x150/000/fff.png&text=${element?.name
+                    src={`https://dummyimage.com/150x150/000/fff.png&text=${(element?.name || "U")
                       .trim()
                       .slice(0, 1)}`}
                     alt="User"
@@ -534,7 +535,7 @@ function ReviewSection() {
                             viewBox="0 0 24 24"
                             width="20"
                             fill={
-                              element.likedBy.includes(currentUser?._id)
+                              element.likedBy.includes(currentUserId)
                                 ? "#E50914"
                                 : lightMode
                                 ? "#606060"
@@ -546,7 +547,7 @@ function ReviewSection() {
                           <span
                             style={{
                               fontSize: "13px",
-                              color: element.likedBy.includes(currentUser?._id)
+                              color: element.likedBy.includes(currentUserId)
                                 ? "#E50914"
                                 : lightMode
                                 ? "#606060"
@@ -577,7 +578,7 @@ function ReviewSection() {
                             viewBox="0 0 24 24"
                             width="20"
                             fill={
-                              element.dislikedBy.includes(currentUser?._id)
+                              element.dislikedBy.includes(currentUserId)
                                 ? "#E50914"
                                 : lightMode
                                 ? "#606060"
@@ -942,7 +943,7 @@ function ReviewSection() {
                 }}
               >
                 <img
-                  src={`https://dummyimage.com/150x150/000/fff.png&text=${element.name
+                  src={`https://dummyimage.com/150x150/000/fff.png&text=${(element?.name || "U")
                     .trim()
                     .slice(0, 1)}`}
                   alt="User"
@@ -1255,19 +1256,19 @@ function ReviewSection() {
                           display: "flex",
                           alignItems: "center",
                           gap: isMobile ? "4px" : isTablet ? "5.1px" : "6px",
-                          background: element.likedBy.includes(currentUser?._id)
+                          background: element.likedBy.includes(currentUserId)
                             ? lightMode
                               ? "rgba(229, 9, 20, 0.1)"
                               : "rgba(229, 9, 20, 0.2)"
                             : "transparent",
                           border: isTablet
                             ? `0.85px solid ${
-                                element.likedBy.includes(currentUser?._id)
+                                element.likedBy.includes(currentUserId)
                                   ? "#ff4757"
                                   : "rgba(255,255,255,0.08)"
                               }`
                             : `1px solid ${
-                                element.likedBy.includes(currentUser?._id)
+                                element.likedBy.includes(currentUserId)
                                   ? "#ff4757"
                                   : "rgba(255,255,255,0.08)"
                               }`,
@@ -1279,7 +1280,7 @@ function ReviewSection() {
                             : "2px 12px 2px 6px",
                           cursor: "pointer",
                           transition: "all 0.2s ease",
-                          boxShadow: element.likedBy.includes(currentUser?._id)
+                          boxShadow: element.likedBy.includes(currentUserId)
                             ? lightMode
                               ? "0 1px 3px rgba(229, 9, 20, 0.2)"
                               : "0 1px 6px rgba(229, 9, 20, 0.3)"
@@ -1292,7 +1293,7 @@ function ReviewSection() {
                           viewBox="0 0 24 24"
                           width={isMobile ? "20" : isTablet ? "17" : "20"}
                           fill={
-                            element.likedBy.includes(currentUser?._id)
+                            element.likedBy.includes(currentUserId)
                               ? lightMode
                                 ? "#E50914"
                                 : "#ff4757"
@@ -1311,7 +1312,7 @@ function ReviewSection() {
                               ? "11.05px"
                               : "13px",
                             fontWeight: "500",
-                            color: element.likedBy.includes(currentUser?._id)
+                            color: element.likedBy.includes(currentUserId)
                               ? lightMode
                                 ? "#E50914"
                                 : "#ff4757"
@@ -1341,12 +1342,12 @@ function ReviewSection() {
                             : "transparent",
                           border: isTablet
                             ? `0.85px solid ${
-                                element.dislikedBy.includes(currentUser?._id)
+                                element.dislikedBy.includes(currentUserId)
                                   ? "#ff4757"
                                   : "rgba(255,255,255,0.08)"
                               }`
                             : `1px solid ${
-                                element.dislikedBy.includes(currentUser?._id)
+                                element.dislikedBy.includes(currentUserId)
                                   ? "#ff4757"
                                   : "rgba(255,255,255,0.08)"
                               }`,
@@ -1373,7 +1374,7 @@ function ReviewSection() {
                           viewBox="0 0 24 24"
                           width={isMobile ? "20" : isTablet ? "17" : "20"}
                           fill={
-                            element.dislikedBy.includes(currentUser?._id)
+                            element.dislikedBy.includes(currentUserId)
                               ? lightMode
                                 ? "#E50914"
                                 : "#ff4757"
@@ -1393,7 +1394,7 @@ function ReviewSection() {
                               ? "11.05px"
                               : "13px",
                             fontWeight: "500",
-                            color: element.dislikedBy.includes(currentUser?._id)
+                            color: element.dislikedBy.includes(currentUserId)
                               ? lightMode
                                 ? "#E50914"
                                 : "#ff4757"

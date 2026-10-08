@@ -14,7 +14,8 @@ function MovieCard({
   movies, 
   lightMode, 
   containerWidth, 
-  isMobile 
+  isMobile,
+  cardWidth,
 }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -27,6 +28,13 @@ function MovieCard({
   };
 
   const getCardStyles = () => {
+    if (cardWidth) {
+      return {
+        width: `${cardWidth}px`,
+        height: `${cardWidth * 1.7}px`,
+      };
+    }
+
     if (isMobile) {
       return {
         width: "calc((100vw - 55px) / 3)",
@@ -93,7 +101,11 @@ function MovieCard({
 
   const imageStyles = {
     width: "100%",
-    height: isMobile ? "200px" : `${parseFloat(cardStyles.width) * 1.4}px`,
+    height: cardWidth
+      ? `${cardWidth * 1.4}px`
+      : isMobile
+      ? "200px"
+      : `${parseFloat(cardStyles.width) * 1.4}px`,
     objectFit: image ? "cover" : "contain",
     borderTopLeftRadius: "8px",
     borderTopRightRadius: "8px",
@@ -238,6 +250,7 @@ MovieCard.propTypes = {
   date: PropTypes.string.isRequired,
   rating: PropTypes.number.isRequired,
   image: PropTypes.string,
+  cardWidth: PropTypes.number,
   index: PropTypes.number.isRequired,
   movies: PropTypes.arrayOf(
     PropTypes.shape({

@@ -1,7 +1,13 @@
 import MovieCard from "./MovieCard";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
+import {
+  applySeenUnseenFilter,
+  buildDiscoverSearchParams,
+  hasDiscoverFilters,
+  parseSortFromDiscoverProp,
+} from "../utils/tmdbFilters";
 
 function MovieCards({
   type,
@@ -14,6 +20,7 @@ function MovieCards({
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const loadMoreRef = useRef(null); 
   const lightMode = useSelector((state) => state.color.isDarkMode);
@@ -37,6 +44,24 @@ function MovieCards({
     setGenre(selectedGenre?.map((name) => genreList?.[name]).filter(Boolean));
   }, [genreList, selectedGenre]);
 
+  const useDiscover = useMemo(
+    () =>
+      discover ||
+      hasDiscoverFilters({
+        genreIds: genre,
+        rating,
+        runtime,
+        selectedYear,
+        sortBy,
+      }),
+    [discover, genre, rating, runtime, selectedYear, sortBy]
+  );
+
+  const displayMovies = useMemo(
+    () => applySeenUnseenFilter(movies, showMovie, watched),
+    [movies, showMovie, watched]
+  );
+
   useEffect(() => {
     setMovies([]);
     setPage(1);
@@ -53,74 +78,44 @@ function MovieCards({
     runtime,
     genre,
     selectedYear,
-    showMovie,
-    watched,
+    useDiscover,
   ]);
 
   async function fetchMovies(pageToFetch) {
-    let filteredMovies = [];
-    let baseUrl = `https://api.themoviedb.org/3/${
-      discover
-        ? "discover/movie"
-        : trending
-        ? `trending/movie/${type}`
-        : `movie/${type}`
-    }?api_key=${import.meta.env.VITE_TMDB_API_KEY}`;
-
     try {
-      const res = await fetch(
-        `${baseUrl}&page=${pageToFetch}${sort ? `&${sort}` : ""}`
-      );
+      let url;
+      if (useDiscover) {
+        const params = buildDiscoverSearchParams({
+          genreIds: genre,
+          rating,
+          runtime,
+          selectedYear,
+          sortBy,
+          defaultSort: parseSortFromDiscoverProp(sort) || "popularity.desc",
+          page: pageToFetch,
+        });
+        url = `https://api.themoviedb.org/3/discover/movie?${params.toString()}`;
+      } else {
+        const baseUrl = `https://api.themoviedb.org/3/${
+          trending ? `trending/movie/${type}` : `movie/${type}`
+        }?api_key=${import.meta.env.VITE_TMDB_API_KEY}`;
+        url = `${baseUrl}&page=${pageToFetch}${sort ? sort : ""}`;
+      }
+
+      const res = await fetch(url);
       const response = await res.json();
       const data = response?.results || [];
+      const apiTotalPages = response?.total_pages ?? 1;
 
-      if (!data.length) {
-        setHasMore(false);
-        setIsLoading(false);
-        return;
-      }
-
-      filteredMovies = data.filter((movie) => {
-        return (
-          (!genre.length || movie.genre_ids.some((g) => genre.includes(g))) &&
-          (!rating[0] || movie.vote_average >= Number(rating[0])) &&
-          (!rating[1] || movie.vote_average <= Number(rating[1])) &&
-          (!runtime[0] || movie.runtime >= Number(runtime[0])) &&
-          (!runtime[1] || movie.runtime <= Number(runtime[1])) &&
-          (!selectedYear[0] ||
-            movie.release_date.slice(0, 4) >= Number(selectedYear[0])) &&
-          (!selectedYear[1] ||
-            movie.release_date.slice(0, 4) <= Number(selectedYear[1]))
-        );
-      });
-
-      if (sortBy === "Release Date (Asc)") {
-        filteredMovies.sort(
-          (a, b) => new Date(a.release_date) - new Date(b.release_date)
-        );
-      } else if (sortBy === "Release Date (Desc)") {
-        filteredMovies.sort(
-          (a, b) => new Date(b.release_date) - new Date(a.release_date)
-        );
-      } else if (sortBy === "Rating") {
-        filteredMovies.sort((a, b) => b.vote_average - a.vote_average);
-      }
-
-      if (showMovie === "Seen") {
-        filteredMovies = filteredMovies.filter((movie) =>
-          watched.includes(movie.id)
-        );
-      } else if (showMovie === "Unseen") {
-        filteredMovies = filteredMovies.filter(
-          (movie) => !watched.includes(movie.id)
-        );
-      }
+      setTotalPages(apiTotalPages);
+      setHasMore(pageToFetch < apiTotalPages);
 
       setMovies((prev) => {
+        if (pageToFetch === 1) {
+          return data;
+        }
         const existingIds = new Set(prev.map((movie) => movie.id));
-        const newMovies = filteredMovies.filter(
-          (movie) => !existingIds.has(movie.id)
-        );
+        const newMovies = data.filter((movie) => !existingIds.has(movie.id));
         return [...prev, ...newMovies];
       });
 
@@ -212,14 +207,14 @@ function MovieCards({
 
   return (
     <div style={containerStyles}>
-      {isLoading && movies.length === 0 ? (
+      {isLoading && displayMovies.length === 0 ? (
         <div style={loadingStyles}>
           <div style={loadingSpinner} />
           <p style={{ fontSize: "18px", fontWeight: 500 }}>Loading Movies...</p>
         </div>
-      ) : movies.length > 0 ? (
+      ) : displayMovies.length > 0 ? (
         <>
-          {movies.map((elem, index) => (
+          {displayMovies.map((elem, index) => (
             <MovieCard
               key={elem.id}
               title={elem.title}
@@ -227,13 +222,13 @@ function MovieCards({
               rating={elem.vote_average}
               image={elem.poster_path}
               index={index}
-              movies={movies}
+              movies={displayMovies}
               lightMode={lightMode}
               containerWidth={containerWidth}
               isMobile={isMobile}
             />
           ))}
-          {hasMore && (
+          {hasMore && page < totalPages && (
             <button
               ref={loadMoreRef}
               style={loadMoreButtonStyles}
