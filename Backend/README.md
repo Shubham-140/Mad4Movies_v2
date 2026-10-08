@@ -2,7 +2,7 @@
 
 Professional Node.js backend service for Mad4Movies built with **Express.js 5.1** following **MVC architecture**. Features enterprise-grade security, authentication, and scalable MongoDB integration.
 
-## 🔐 **Security Features**
+## 🔐 **Security Features** 
 
 ### **Multi-Layer Authentication**
 * **JWT Tokens** - Stateless authentication with configurable expiration
