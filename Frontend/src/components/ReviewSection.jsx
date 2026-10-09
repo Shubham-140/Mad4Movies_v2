@@ -7,11 +7,11 @@ import {
   toggleReviewReaction,
   deleteReview,
   selectReviewsByMovieId,
-  // selectReviewStatus,
-  // selectReviewError,
+  selectReviewError,
 } from "../features/ReviewSlice";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { useMediaQuery } from "react-responsive";
+import { useParams } from "react-router-dom";
 import { setLoginWindow } from "../features/AuthSlice";
 
 function ReviewSection() {
@@ -19,7 +19,10 @@ function ReviewSection() {
   const textareaRef = useRef(null);
   const currentUser = useSelector((state) => state.auth.currentUser);
   const lightMode = useSelector((state) => state.color.isDarkMode);
-  const movieId = useSelector((state) => state.movieDetails.movieId);
+  const movieIdFromStore = useSelector((state) => state.movieDetails.movieId);
+  const { id: movieIdFromRoute } = useParams();
+  const movieId = Number(movieIdFromStore || movieIdFromRoute) || null;
+  const reviewError = useSelector(selectReviewError);
   const [confirmDeleteReview, setConfirmDeleteReview] = useState(false);
   const [review, setReview] = useState("");
   const [reviewIdToSend, setReviewIdToSend] = useState(null);
@@ -27,7 +30,17 @@ function ReviewSection() {
   const [editedReviewId, setEditedReviewId] = useState(null);
   const [isTextAreaFocused, setIsTextAreaFocused] = useState(false);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const currentUserId = currentUser?._id ? String(currentUser._id) : null;
+  const currentUserId = currentUser?._id
+    ? String(currentUser._id)
+    : currentUser?.id
+    ? String(currentUser.id)
+    : null;
+  const composerAvatarLetter = (
+    currentUser?.name?.trim()?.[0] || "?"
+  ).toUpperCase();
+  const composerAvatarSrc = `https://dummyimage.com/150x150/4a5568/ffffff.png&text=${encodeURIComponent(
+    composerAvatarLetter
+  )}`;
 
   // Get reviews from Redux store
   const reviews = useSelector((state) =>
@@ -85,39 +98,50 @@ function ReviewSection() {
     }
   }, [movieId, dispatch]);
 
-  function handlePublishReview() {
-    if (!review.trim() || !currentUser) return;
+  async function handlePublishReview() {
+    const userId = currentUser?._id || currentUser?.id;
+    if (!review.trim() || !userId || !movieId) {
+      if (!userId) dispatch(setLoginWindow(true));
+      return;
+    }
 
-    const reviewData = {
-      movieId,
-      review,
-      userId: currentUser._id,
-      name: currentUser.name,
-    };
+    const reviewText = review.trim();
+    const result = await dispatch(
+      createReview({
+        movieId,
+        review: reviewText,
+        userId,
+        name: currentUser.name,
+      })
+    );
 
-    dispatch(createReview(reviewData));
-    setReview("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+    if (createReview.fulfilled.match(result)) {
+      setReview("");
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+      }
     }
   }
 
   const handleEditSubmit = (reviewId) => {
     if (!editedReview.trim()) return;
 
+    const newReview = editedReview.trim();
+    // Exit edit mode immediately; Redux updates text optimistically
+    setEditedReviewId(null);
+    setEditedReview("");
+
     dispatch(
       updateReviewText({
         reviewId,
-        newReview: editedReview,
+        newReview,
+        movieId,
       })
     );
-
-    setEditedReviewId(null);
-    setEditedReview("");
   };
 
   const handleToggleReaction = (reviewId, action) => {
-    if (!isLoggedIn) {
+    if (!isLoggedIn || !currentUserId) {
       dispatch(setLoginWindow(true));
       return;
     }
@@ -126,13 +150,18 @@ function ReviewSection() {
       toggleReviewReaction({
         reviewId,
         action,
-        userId: currentUser._id,
+        userId: currentUserId,
       })
     );
   };
 
   const handleDeleteReview = (reviewId) => {
-    dispatch(deleteReview(reviewId));
+    dispatch(
+      deleteReview({
+        reviewId,
+        movieId: movieId != null ? Number(movieId) : undefined,
+      })
+    );
     setConfirmDeleteReview(false);
   };
 
@@ -238,11 +267,8 @@ function ReviewSection() {
             }}
           >
             <img
-              src={`https://dummyimage.com/150x150/000/fff.png&text=${currentUser?.name.slice(
-                0,
-                1
-              )}`}
-              alt="User"
+              src={composerAvatarSrc}
+              alt={currentUser ? "You" : "Guest"}
               style={{
                 width: `${avatarSize}px`,
                 height: `${avatarSize}px`,
@@ -335,6 +361,19 @@ function ReviewSection() {
               Comment
             </button>
           </div>
+          {reviewError && (
+            <p
+              style={{
+                color: "#ef4444",
+                fontSize: "13px",
+                margin: "8px 0 0",
+              }}
+            >
+              {typeof reviewError === "string"
+                ? reviewError
+                : "Could not post comment. Try again."}
+            </p>
+          )}
         </div>
 
         {reviews && Object.keys(reviews).length > 0 && (
@@ -764,11 +803,8 @@ function ReviewSection() {
           }}
         >
           <img
-            src={`https://dummyimage.com/150x150/000/fff.png&text=${currentUser?.name.slice(
-              0,
-              1
-            )}`}
-            alt="User"
+            src={composerAvatarSrc}
+            alt={currentUser ? "You" : "Guest"}
             style={{
               width: `${avatarSize}px`,
               height: `${avatarSize}px`,
@@ -874,6 +910,20 @@ function ReviewSection() {
             {isMobile ? "Publish" : "Publish Review"}
           </button>
         </div>
+        {reviewError && (
+          <p
+            style={{
+              color: "#ef4444",
+              fontSize: "13px",
+              margin: "8px 0 0",
+              paddingLeft: isMobile ? "16px" : 0,
+            }}
+          >
+            {typeof reviewError === "string"
+              ? reviewError
+              : "Could not post comment. Try again."}
+          </p>
+        )}
       </div>
 
       {reviews && Object.keys(reviews).length > 0 && (

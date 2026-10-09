@@ -40,6 +40,9 @@ function App() {
         .then((user) => {
           dispatch(setCurrentUser(user));
           dispatch(setIsLoggedIn(true));
+          dispatch(loadAllFavorites(user.favorites || []));
+          dispatch(loadAllWatchList(user.watchList || []));
+          dispatch(loadAllWatched(user.watched || []));
         })
         .catch(() => {
           dispatch(setIsLoggedIn(false));

@@ -10,7 +10,7 @@ const store = configureStore({
         color: colorReducer,
         auth: authReducer,
         faq: faqReducer,
-        review: reviewReducer,
+        reviews: reviewReducer,
         movieDetails: movieDetailsReducer,
     }
 });

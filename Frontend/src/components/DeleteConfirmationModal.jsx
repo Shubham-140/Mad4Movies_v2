@@ -224,8 +224,12 @@ function DeleteConfirmationModal({ reviewIdToSend, setConfirmDeleteReview }) {
           <button
             style={styles.deleteButton}
             onClick={() => {
+              if (!reviewIdToSend) return;
               dispatch(
-                deleteReview({ movieId: movieId, reviewId: reviewIdToSend })
+                deleteReview({
+                  reviewId: reviewIdToSend,
+                  movieId: movieId != null ? Number(movieId) : undefined,
+                })
               );
               setConfirmDeleteReview(false);
             }}
@@ -239,7 +243,7 @@ function DeleteConfirmationModal({ reviewIdToSend, setConfirmDeleteReview }) {
 }
 
 DeleteConfirmationModal.propTypes = {
-  reviewIdToSend: PropTypes.number.isRequired,
+  reviewIdToSend: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   setConfirmDeleteReview: PropTypes.func.isRequired,
 };
 

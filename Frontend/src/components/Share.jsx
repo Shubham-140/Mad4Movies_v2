@@ -11,7 +11,11 @@ const Share = ({ shareBtnRef }) => {
   const shareRef = useRef();
   const dispatch = useDispatch();
   const lightMode = useSelector((state) => state.color.isDarkMode);
-  const currentUrl = window.location.href;
+  // Always share the production URL so recipients never get localhost
+  const shareOrigin = (
+    import.meta.env.VITE_FRONTEND_URL || "https://mad4movies.vercel.app"
+  ).replace(/\/$/, "");
+  const currentUrl = `${shareOrigin}${window.location.pathname}${window.location.search}`;
   const copyRef = useRef();
   const urlRef = useRef();
   const movieName = movie?.title;
@@ -33,7 +37,7 @@ const Share = ({ shareBtnRef }) => {
     )}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
       currentUrl
-    )}"e=${encodeURIComponent(message)}`,
+    )}&quote=${encodeURIComponent(message)}`,
     telegram: `https://t.me/share/url?url=${encodeURIComponent(
       currentUrl
     )}&text=${encodeURIComponent(message)}`,

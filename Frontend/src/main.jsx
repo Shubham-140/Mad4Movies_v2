@@ -15,6 +15,7 @@ import Upcoming from "./components/Upcoming.jsx";
 import FAQ from "./components/FAQ.jsx";
 import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import FullScreenLoader from "./components/FullScreenLoader.jsx";
 const Contact = lazy(() => import("./components/Contact.jsx"));
 const About = lazy(() => import("./components/About.jsx"));
 const RecommendedMovies = lazy(() =>
@@ -63,7 +64,7 @@ const router = createBrowserRouter([
       {
         path: "/contact",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <Contact />
           </Suspense>
         ),
@@ -71,7 +72,7 @@ const router = createBrowserRouter([
       {
         path: "/about",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <About />
           </Suspense>
         ),
@@ -79,7 +80,7 @@ const router = createBrowserRouter([
       {
         path: "/recommended-movies",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <RecommendedMovies />
           </Suspense>
         ),
@@ -87,7 +88,7 @@ const router = createBrowserRouter([
       {
         path: "/privacy-policy",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <PrivacyPolicy />
           </Suspense>
         ),
@@ -95,7 +96,7 @@ const router = createBrowserRouter([
       {
         path: "/terms",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <TermsOfService />
           </Suspense>
         ),
@@ -103,7 +104,7 @@ const router = createBrowserRouter([
       {
         path: "/movie/:id/:title",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <MovieComponent />
           </Suspense>
         ),
@@ -111,7 +112,7 @@ const router = createBrowserRouter([
       {
         path: "/trending-movies",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <TrendingMovies />
           </Suspense>
         ),
@@ -119,7 +120,7 @@ const router = createBrowserRouter([
       {
         path: "/upcoming-movies",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <UpcomingMovies />
           </Suspense>
         ),
@@ -127,7 +128,7 @@ const router = createBrowserRouter([
       {
         path: "/in-theatres",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <InCinemasMovies />
           </Suspense>
         ),
@@ -135,7 +136,7 @@ const router = createBrowserRouter([
       {
         path: "/search-results/:query",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <MovieSearchResults />
           </Suspense>
         ),
@@ -143,7 +144,7 @@ const router = createBrowserRouter([
       {
         path: "/top-rated-movies",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <TopRated />
           </Suspense>
         ),
@@ -151,7 +152,7 @@ const router = createBrowserRouter([
       {
         path: "/watchlist",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <WatchList />
           </Suspense>
         ),
@@ -159,7 +160,7 @@ const router = createBrowserRouter([
       {
         path: "/favorites",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <FavoriteList />
           </Suspense>
         ),
@@ -167,7 +168,7 @@ const router = createBrowserRouter([
       {
         path: "/profile/:ID/:name",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <PersonProfile />
           </Suspense>
         ),
@@ -175,7 +176,7 @@ const router = createBrowserRouter([
       {
         path: "/movies/genre/:genreId",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <GenreFilteredMoviesCards />
           </Suspense>
         ),
@@ -183,7 +184,7 @@ const router = createBrowserRouter([
       {
         path: "/user/:username",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <UserProfile />
           </Suspense>
         ),
@@ -191,7 +192,7 @@ const router = createBrowserRouter([
       {
         path: "/auth-error",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <AuthError />
           </Suspense>
         ),
@@ -199,7 +200,7 @@ const router = createBrowserRouter([
       {
         path: "/blog",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <Blog />
           </Suspense>
         ),
@@ -207,7 +208,7 @@ const router = createBrowserRouter([
       {
         path: "/cookie-policy",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <Cookies />
           </Suspense>
         ),
@@ -215,7 +216,7 @@ const router = createBrowserRouter([
       {
         path: "/my-settings",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<FullScreenLoader />}>
             <Settings />
           </Suspense>
         ),

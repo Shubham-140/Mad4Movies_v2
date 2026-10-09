@@ -1,8 +1,5 @@
 const mongoose = require('mongoose');
-let nanoid;
-import('nanoid').then((module) => {
-    nanoid = module.nanoid;
-}).catch((err) => console.error(err));
+const { nanoid } = require('nanoid');
 
 const reviewsSchema = new mongoose.Schema({
     userId: {

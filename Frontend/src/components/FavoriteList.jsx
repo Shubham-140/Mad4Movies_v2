@@ -2,12 +2,14 @@ import Filters from "./Filters";
 import { useSelector } from "react-redux";
 import { useEffect, useMemo, useState } from "react";
 import MovieCard from "./MovieCard";
+import FullScreenLoader from "./FullScreenLoader";
 import { fetchTmdbMoviesByIds } from "../utils/tmdb";
 import { filterSavedMovies } from "../utils/tmdbFilters";
 
 function FavoriteList() {
   const lightMode = useSelector((state) => state.color.isDarkMode);
   const favorites = useSelector((state) => state.movieDetails.favorites);
+  const currentUser = useSelector((state) => state.auth.currentUser);
   const [movies, setMovies] = useState([]);
   const [genre, setGenre] = useState([]);
   const runtime = useSelector((state) => state.movieDetails.runtime);
@@ -20,10 +22,15 @@ function FavoriteList() {
   const selectedGenre = useSelector(
     (state) => state.movieDetails.selectedGenre
   );
-  const [isLoading, setIsLoading] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const isMobile = screenWidth <= 768;
   const cardWidth = screenWidth < 1024 ? 130 : 140;
+
+  const awaitingAuth =
+    typeof window !== "undefined" &&
+    Boolean(localStorage.getItem("auth_token")) &&
+    !currentUser;
 
   useEffect(() => {
     const updateWidth = () => setScreenWidth(window.innerWidth);
@@ -36,26 +43,30 @@ function FavoriteList() {
   }, [genreList, selectedGenre]);
 
   useEffect(() => {
+    if (awaitingAuth) {
+      return;
+    }
+
     if (!favorites.length) {
       setMovies([]);
+      setHasLoadedOnce(true);
       return;
     }
 
     let cancelled = false;
-    setIsLoading(true);
 
     fetchTmdbMoviesByIds(favorites)
       .then((data) => {
         if (!cancelled) setMovies(data);
       })
       .finally(() => {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) setHasLoadedOnce(true);
       });
 
     return () => {
       cancelled = true;
     };
-  }, [favorites]);
+  }, [favorites, awaitingAuth]);
 
   const list = useMemo(
     () =>
@@ -71,44 +82,12 @@ function FavoriteList() {
     [movies, genre, rating, runtime, selectedYear, sortBy, showMovie, watched]
   );
 
+  if (awaitingAuth || !hasLoadedOnce) {
+    return <FullScreenLoader />;
+  }
+
   return (
     <div>
-      {isLoading && (
-        <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            zIndex: 1000,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              width: "50px",
-              height: "50px",
-              border: `4px solid ${lightMode ? "#e2e8f0" : "#4a5568"}`,
-              borderTop: `4px solid ${lightMode ? "#4299e1" : "#63b3ed"}`,
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-            }}
-          ></div>
-          <p
-            style={{
-              marginTop: "16px",
-              color: lightMode ? "#4a5568" : "#a0aec0",
-              fontSize: "1rem",
-            }}
-          >
-            Loading...
-          </p>
-        </div>
-      )}
-
       {isMobile ? (
         <div
           style={{
@@ -208,7 +187,7 @@ function FavoriteList() {
                       opacity: "0.7",
                     }}
                   >
-                    {favorites.length === 0 ? "❤️" : "🔍"}
+                    {favorites.length === 0 ? "â¤ï¸" : "ð"}
                   </div>
                   <p>
                     {favorites.length === 0
@@ -330,7 +309,7 @@ function FavoriteList() {
                       opacity: "0.7",
                     }}
                   >
-                    {favorites.length === 0 ? "❤️" : "🔍"}
+                    {favorites.length === 0 ? "â¤ï¸" : "ð"}
                   </div>
                   <p>
                     {favorites.length === 0

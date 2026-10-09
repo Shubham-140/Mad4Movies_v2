@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { useDispatch } from "react-redux";
 import { setMovieId, setRecentlyViewed } from "../features/MovieDetailsSlice";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import slugify from "slugify";
 
@@ -21,8 +21,6 @@ function MovieCard({
   const navigate = useNavigate();
   const titleRef = useRef(null);
   const containerRef = useRef(null);
-  const id = useParams();
-
   const createSlug = (title) => {
     return encodeURIComponent(slugify(title, { lower: true, strict: true }));
   };
@@ -32,6 +30,7 @@ function MovieCard({
       return {
         width: `${cardWidth}px`,
         height: `${cardWidth * 1.7}px`,
+        flex: "0 0 auto",
       };
     }
 
@@ -71,9 +70,10 @@ function MovieCard({
   };
 
   function handleTitleClick() {
-    dispatch(setMovieId(id));
-    dispatch(setRecentlyViewed(movies[index].id));
-    navigate(`/movie/${movies[index].id}/${createSlug(movies[index].title)}`);
+    const movie = movies[index];
+    dispatch(setMovieId(movie.id));
+    dispatch(setRecentlyViewed(movie.id));
+    navigate(`/movie/${movie.id}/${createSlug(movie.title)}`);
   }
 
   const getFontSizes = () => {

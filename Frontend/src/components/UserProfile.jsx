@@ -21,6 +21,10 @@ const UserProfile = () => {
   });
   const { username } = useParams();
 
+  // Match homepage MovieCardHome sizes (125 / 160 / 185)
+  const profileCardWidth =
+    windowSize.width < 768 ? 125 : windowSize.width < 1024 ? 160 : 185;
+
   useEffect(() => {
     fetch(apiUrl(`/user/${username}`))
       .then((res) => {
@@ -393,8 +397,13 @@ const UserProfile = () => {
     },
     moviesGrid: {
       display: "flex",
+      alignItems: "flex-start",
       overflowX: "auto",
-      gap: "35px",
+      gap: "8px",
+      padding: "0px 8px",
+      scrollbarWidth: "none",
+      WebkitOverflowScrolling: "touch",
+      minHeight: "250px",
     },
     emptyState: {
       backgroundColor: lightMode ? "#f9fafb" : "#4a5568",
@@ -637,8 +646,13 @@ const UserProfile = () => {
     },
     moviesGrid: {
       display: "flex",
+      alignItems: "flex-start",
       overflowX: "auto",
-      gap: "45px",
+      gap: "10px",
+      padding: "10px",
+      scrollbarWidth: "none",
+      WebkitOverflowScrolling: "touch",
+      minHeight: "320px",
     },
     emptyState: {
       backgroundColor: lightMode ? "#f9fafb" : "#4a5568",
@@ -881,8 +895,13 @@ const UserProfile = () => {
     },
     moviesGrid: {
       display: "flex",
+      alignItems: "flex-start",
       overflowX: "auto",
-      gap: "105px",
+      gap: "13px",
+      padding: "12px",
+      scrollbarWidth: "none",
+      WebkitOverflowScrolling: "touch",
+      minHeight: "400px",
     },
     emptyState: {
       backgroundColor: lightMode ? "#f9fafb" : "#4a5568",
@@ -1227,9 +1246,9 @@ const UserProfile = () => {
                 style={{
                   backgroundColor: lightMode ? "#f3f4f6" : "#4a5568",
                   borderRadius: "8px",
-                  width: "160px",
-                  height: "300px",
-                  minWidth: "160px",
+                  width: `${profileCardWidth}px`,
+                  height: `${profileCardWidth * 1.7}px`,
+                  flex: "0 0 auto",
                   position: "relative",
                   overflow: "hidden",
                 }}
@@ -1255,36 +1274,17 @@ const UserProfile = () => {
         ) : list.length > 0 ? (
           <div style={styles.moviesGrid}>
             {list.map((elem, index) => (
-              <div
+              <MovieCard
                 key={elem.id}
-                style={{
-                  width:
-                    windowSize.width < 768
-                      ? "1fr"
-                      : windowSize.width < 1024
-                      ? "1fr"
-                      : "1fr",
-                  minWidth:
-                    windowSize.width < 768
-                      ? "100px"
-                      : windowSize.width < 1024
-                      ? "120px"
-                      : "150px",
-                }}
-              >
-                <MovieCard
-                  key={elem.id}
-                  title={elem.title}
-                  date={elem.release_date}
-                  rating={elem.vote_average}
-                  image={elem.poster_path}
-                  index={index}
-                  movies={list}
-                  lightMode={lightMode}
-                  isMobile={windowSize.width < 768}
-                  containerWidth={windowSize.width}
-                />
-              </div>
+                title={elem.title}
+                date={elem.release_date}
+                rating={elem.vote_average}
+                image={elem.poster_path}
+                index={index}
+                movies={list}
+                lightMode={lightMode}
+                cardWidth={profileCardWidth}
+              />
             ))}
           </div>
         ) : (
@@ -1354,9 +1354,9 @@ const UserProfile = () => {
                 style={{
                   backgroundColor: lightMode ? "#f3f4f6" : "#4a5568",
                   borderRadius: "8px",
-                  width: "160px",
-                  height: "300px",
-                  minWidth: "160px",
+                  width: `${profileCardWidth}px`,
+                  height: `${profileCardWidth * 1.7}px`,
+                  flex: "0 0 auto",
                   position: "relative",
                   overflow: "hidden",
                 }}
@@ -1382,36 +1382,17 @@ const UserProfile = () => {
         ) : favList.length > 0 ? (
           <div style={styles.moviesGrid}>
             {favList.map((elem, index) => (
-              <div
+              <MovieCard
                 key={elem.id}
-                style={{
-                  width:
-                    windowSize.width < 768
-                      ? "1fr"
-                      : windowSize.width < 1024
-                      ? "1fr"
-                      : "1fr",
-                  minWidth:
-                    windowSize.width < 768
-                      ? "100px"
-                      : windowSize.width < 1024
-                      ? "120px"
-                      : "150px",
-                }}
-              >
-                <MovieCard
-                  key={elem.id}
-                  title={elem.title}
-                  date={elem.release_date}
-                  rating={elem.vote_average}
-                  image={elem.poster_path}
-                  index={index}
-                  movies={list}
-                  lightMode={lightMode}
-                  isMobile={windowSize.width < 768}
-                  containerWidth={windowSize.width}
-                />
-              </div>
+                title={elem.title}
+                date={elem.release_date}
+                rating={elem.vote_average}
+                image={elem.poster_path}
+                index={index}
+                movies={favList}
+                lightMode={lightMode}
+                cardWidth={profileCardWidth}
+              />
             ))}
           </div>
         ) : (
