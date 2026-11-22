@@ -13,10 +13,20 @@ const { generateToken, jwtAuthMiddleware } = require('./jwt'); // Import jwtAuth
 // app.use(session({ ... }));
 
 const cors = require('cors');
+
+// Frontends allowed to call this API. FRONTEND_URL adds one more (e.g. a preview deploy).
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://mad4movies.vercel.app',
+    process.env.FRONTEND_URL,
+].filter(Boolean);
+
 const corsOptions = {
-    origin: process.env.NODE_ENV === 'production'
-        ? 'https://mad4movies.vercel.app'
-        : 'http://localhost:5173',
+    origin(origin, callback) {
+        // Requests without an Origin header (curl, server-to-server) are allowed.
+        // Unknown origins get no CORS headers, so the browser blocks them.
+        callback(null, !origin || allowedOrigins.includes(origin));
+    },
     credentials: true,
     optionsSuccessStatus: 200
 };
