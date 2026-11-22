@@ -2,6 +2,7 @@ import Filters from "./Filters";
 import { useSelector } from "react-redux";
 import { useEffect, useState, useRef, useMemo } from "react";
 import MovieCard from "./MovieCard";
+import FullScreenLoader from "./FullScreenLoader";
 import { fetchTmdbMoviesByIds } from "../utils/tmdb";
 import { applyMovieFilters } from "../utils/movieFilters";
 import { useMovieFilters } from "../utils/useMovieFilters";
@@ -53,41 +54,7 @@ function FavoriteList() {
 
   return (
     <div>
-      {isLoading && (
-        <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            zIndex: 1000,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              width: "50px",
-              height: "50px",
-              border: `4px solid ${lightMode ? "#e2e8f0" : "#4a5568"}`,
-              borderTop: `4px solid ${lightMode ? "#4299e1" : "#63b3ed"}`,
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-            }}
-          ></div>
-          <p
-            style={{
-              marginTop: "16px",
-              color: lightMode ? "#4a5568" : "#a0aec0",
-              fontSize: "1rem",
-            }}
-          >
-            Loading...
-          </p>
-        </div>
-      )}
+      {isLoading && <FullScreenLoader />}
 
       {isMobile ? (
         <div
@@ -329,13 +296,6 @@ function FavoriteList() {
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import Filters from "./Filters";
 import MovieCard from "./MovieCard";
+import FullScreenLoader from "./FullScreenLoader";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { tmdbApiUrl } from "../utils/tmdb";
@@ -134,20 +135,7 @@ function GenreFilteredMoviesCards() {
 
             <div style={{ position: "relative", minHeight: "500px" }}>
               {isLoading ? (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    zIndex: 10,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                </div>
+                <FullScreenLoader />
               ) : list.length > 0 ? (
                 <div
                   style={{
@@ -265,20 +253,7 @@ function GenreFilteredMoviesCards() {
 
             <div style={{ position: "relative", minHeight: "500px" }}>
               {isLoading ? (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    zIndex: 10,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                </div>
+                <FullScreenLoader />
               ) : list.length > 0 ? (
                 <div
                   style={{
@@ -321,13 +296,6 @@ function GenreFilteredMoviesCards() {
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }

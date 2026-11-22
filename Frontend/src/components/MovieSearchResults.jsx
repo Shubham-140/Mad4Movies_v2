@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import MovieCard from "./MovieCard";
+import FullScreenLoader from "./FullScreenLoader";
 import Filters from "./Filters";
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
@@ -118,39 +119,7 @@ function MovieSearchResults() {
 
             <div style={{ position: "relative", minHeight: "500px" }}>
               {isLoading ? (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    zIndex: 10,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "50px",
-                      height: "50px",
-                      border: `4px solid ${lightMode ? "#e2e8f0" : "#4a5568"}`,
-                      borderTop: `4px solid ${lightMode ? "#4299e1" : "#63b3ed"}`,
-                      borderRadius: "50%",
-                      animation: "spin 1s linear infinite",
-                    }}
-                  ></div>
-                  <p
-                    style={{
-                      marginTop: "16px",
-                      color: lightMode ? "#4a5568" : "#a0aec0",
-                      fontSize: "1rem",
-                    }}
-                  >
-                    Loading results...
-                  </p>
-                </div>
+                <FullScreenLoader />
               ) : movies?.length > 0 ? (
                 <div
                   style={{
@@ -291,39 +260,7 @@ function MovieSearchResults() {
 
             <div style={{ position: "relative", minHeight: "500px" }}>
               {isLoading ? (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    zIndex: 10,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "50px",
-                      height: "50px",
-                      border: `4px solid ${lightMode ? "#e2e8f0" : "#4a5568"}`,
-                      borderTop: `4px solid ${lightMode ? "#4299e1" : "#63b3ed"}`,
-                      borderRadius: "50%",
-                      animation: "spin 1s linear infinite",
-                    }}
-                  ></div>
-                  <p
-                    style={{
-                      marginTop: "16px",
-                      color: lightMode ? "#4a5568" : "#a0aec0",
-                      fontSize: "1rem",
-                    }}
-                  >
-                    Loading results...
-                  </p>
-                </div>
+                <FullScreenLoader />
               ) : movies?.length > 0 ? (
                 <div
                   style={{
@@ -379,13 +316,6 @@ function MovieSearchResults() {
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </>
   );
 }

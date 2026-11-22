@@ -1,4 +1,5 @@
 import MovieCard from "./MovieCard";
+import FullScreenLoader from "./FullScreenLoader";
 import { useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
@@ -133,17 +134,6 @@ function MovieCards({
     color: lightMode ? "#4b5563" : "#9ca3af",
   };
 
-  const loadingSpinner = {
-    width: "50px",
-    height: "50px",
-    border: `4px solid ${
-      lightMode ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)"
-    }`,
-    borderTop: `4px solid ${lightMode ? "#3b82f6" : "#60a5fa"}`,
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-  };
-
   const loadMoreButtonStyles = {
     gridColumn: "1 / -1",
     justifySelf: "center",
@@ -161,10 +151,7 @@ function MovieCards({
   return (
     <div style={containerStyles}>
       {isLoading && movies.length === 0 ? (
-        <div style={loadingStyles}>
-          <div style={loadingSpinner} />
-          <p style={{ fontSize: "18px", fontWeight: 500 }}>Loading Movies...</p>
-        </div>
+        <FullScreenLoader />
       ) : movies.length > 0 ? (
         <>
           {movies.map((elem, index) => (
@@ -221,15 +208,6 @@ function MovieCards({
           </p>
         </div>
       )}
-
-      <style>
-        {`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}
-      </style>
     </div>
   );
 }
