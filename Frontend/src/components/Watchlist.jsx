@@ -1,12 +1,13 @@
 import Filters from "./Filters";
 import { useSelector } from "react-redux";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import MovieCard from "./MovieCard";
+import { fetchTmdbMoviesByIds } from "../utils/tmdb";
 
 function WatchList() {
   const lightMode = useSelector((state) => state.color.isDarkMode);
   const watchList = useSelector((state) => state.movieDetails.watchList);
-  const [list, setList] = useState([]);
+  const [movies, setMovies] = useState([]);
   const [genre, setGenre] = useState([]);
   const runtime = useSelector((state) => state.movieDetails.runtime);
   const rating = useSelector((state) => state.movieDetails.rating);
@@ -39,80 +40,63 @@ function WatchList() {
   }, [genreList, selectedGenre]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const result = await Promise.all(
-          watchList.map((id) =>
-            fetch(
-              `https://api.themoviedb.org/3/movie/${id}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
-            ).then((response) => response.json())
-          )
-        );
-
-        const allMovies = [...result];
-
-        let filteredMovies = allMovies
-          .map((movie) => ({
-            ...movie,
-            genre_ids: movie.genres?.map((genre) => genre.id) || [],
-          }))
-          .filter(
-            (movie) =>
-              (!genre.length ||
-                movie.genre_ids.some((g) => genre.includes(g))) &&
-              (!rating[0] || movie.vote_average >= Number(rating[0])) &&
-              (!rating[1] || movie.vote_average <= Number(rating[1])) &&
-              (!runtime[0] || movie.runtime >= Number(runtime[0])) &&
-              (!runtime[1] || movie.runtime <= Number(runtime[1])) &&
-              (!selectedYear[0] ||
-                movie.release_date.slice(0, 4) >= Number(selectedYear[0])) &&
-              (!selectedYear[1] ||
-                movie.release_date.slice(0, 4) <= Number(selectedYear[1]))
-          );
-
-        if (sortBy === "Release Date (Asc)") {
-          filteredMovies.sort(
-            (a, b) => new Date(a.release_date) - new Date(b.release_date)
-          );
-        } else if (sortBy === "Release Date (Desc)") {
-          filteredMovies.sort(
-            (a, b) => new Date(b.release_date) - new Date(a.release_date)
-          );
-        } else if (sortBy === "Rating") {
-          filteredMovies.sort((a, b) => b.vote_average - a.vote_average);
-        }
-
-        if (showMovie === "Seen") {
-          filteredMovies = filteredMovies.filter((movie) =>
-            watched.includes(movie.id)
-          );
-        } else if (showMovie === "Unseen") {
-          filteredMovies = filteredMovies.filter(
-            (movie) => !watched.includes(movie.id)
-          );
-        }
-
-        setList(filteredMovies);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
+    let cancelled = false;
+    if (!watchList.length) {
+      setMovies([]);
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    fetchTmdbMoviesByIds(watchList)
+      .then((result) => {
+        if (!cancelled) setMovies(result);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
     };
+  }, [watchList]);
 
-    if (watchList.length) fetchData();
-    else setList([]);
-  }, [
-    watchList,
-    genre,
-    runtime,
-    selectedYear,
-    rating,
-    sortBy,
-    showMovie,
-    watched,
-  ]);
+  const list = useMemo(() => {
+    let filteredMovies = movies.filter(
+      (movie) =>
+        (!genre.length || movie.genre_ids.some((g) => genre.includes(g))) &&
+        (!rating[0] || movie.vote_average >= Number(rating[0])) &&
+        (!rating[1] || movie.vote_average <= Number(rating[1])) &&
+        (!runtime[0] || movie.runtime >= Number(runtime[0])) &&
+        (!runtime[1] || movie.runtime <= Number(runtime[1])) &&
+        (!selectedYear[0] ||
+          (movie.release_date || "").slice(0, 4) >= Number(selectedYear[0])) &&
+        (!selectedYear[1] ||
+          (movie.release_date || "").slice(0, 4) <= Number(selectedYear[1]))
+    );
+
+    if (sortBy === "Release Date (Asc)") {
+      filteredMovies.sort(
+        (a, b) => new Date(a.release_date) - new Date(b.release_date)
+      );
+    } else if (sortBy === "Release Date (Desc)") {
+      filteredMovies.sort(
+        (a, b) => new Date(b.release_date) - new Date(a.release_date)
+      );
+    } else if (sortBy === "Rating") {
+      filteredMovies.sort((a, b) => b.vote_average - a.vote_average);
+    }
+
+    if (showMovie === "Seen") {
+      filteredMovies = filteredMovies.filter((movie) =>
+        watched.includes(movie.id)
+      );
+    } else if (showMovie === "Unseen") {
+      filteredMovies = filteredMovies.filter(
+        (movie) => !watched.includes(movie.id)
+      );
+    }
+
+    return filteredMovies;
+  }, [movies, genre, runtime, selectedYear, rating, sortBy, showMovie, watched]);
 
   return (
     <div>
