@@ -5,13 +5,16 @@ import PropTypes from "prop-types";
 import X_DarkMode from "../img/X_DarkMode.jpg";
 import X_LightMode from "../img/X_LightMode.jpg";
 import { useMediaQuery } from "react-responsive";
+import { publicSiteUrl } from "../utils/api";
 
 const Share = ({ shareBtnRef }) => {
   const movie = useSelector((state) => state.movieDetails.movie);
   const shareRef = useRef();
   const dispatch = useDispatch();
   const lightMode = useSelector((state) => state.color.isDarkMode);
-  const currentUrl = window.location.href;
+  const currentUrl = publicSiteUrl(
+    `${window.location.pathname}${window.location.search}${window.location.hash}`
+  );
   const copyRef = useRef();
   const urlRef = useRef();
   const movieName = movie?.title;
