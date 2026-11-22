@@ -173,7 +173,7 @@ export const MovieDetailsSlice = createSlice({
             state.watched = action.payload;
         },
         loadAllRecentlyViewed: (state, action) => {
-            state.watched = action.payload;
+            state.recentlyViewed = action.payload;
         },
     }
 })

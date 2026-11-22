@@ -81,7 +81,7 @@ const MovieComponent = () => {
   }, []);
 
   useEffect(() => {
-    dispatch(setMovieId(id));
+    dispatch(setMovieId(Number(id)));
   }, [id, dispatch]);
 
   function setGenre(genreId) {
