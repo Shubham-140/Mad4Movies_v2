@@ -62,15 +62,15 @@ router.post('/update/like/:reviewId', async (req, res) => {
             return res.status(404).json({ error: "Review not found" });
         }
 
-        // Remove user from opposite reaction
-        review.dislikedBy.pull(userId);
-        review.likedBy.pull(userId);
+        const target = action === "like" ? review.likedBy : review.dislikedBy;
+        const opposite = action === "like" ? review.dislikedBy : review.likedBy;
+        const alreadyReacted = target.some((id) => String(id) === String(userId));
 
-        // Add to the selected action
-        if (action === "like") {
-            review.likedBy.addToSet(userId);
+        opposite.pull(userId);
+        if (alreadyReacted) {
+            target.pull(userId);
         } else {
-            review.dislikedBy.addToSet(userId);
+            target.addToSet(userId);
         }
 
         await review.save();
