@@ -10,6 +10,7 @@ import {
   setShowGenre,
 } from "./features/MovieDetailsSlice";
 import { setCurrentUser, setIsLoggedIn } from "./features/AuthSlice";
+import { apiUrl } from "./utils/api";
 import { setMode } from "./features/ColorSlice";
 
 function App() {
@@ -32,7 +33,7 @@ function App() {
   const fetchUserData = (token, needsParsing = false) => {
     const parsedToken = needsParsing ? JSON.parse(token) : token;
     
-    fetch("https://mad4movies.onrender.com/auth/me", {
+    fetch(apiUrl("/auth/me"), {
       headers: { Authorization: `Bearer ${parsedToken}` }
     })
       .then(res => res.json())

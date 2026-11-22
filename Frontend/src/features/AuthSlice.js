@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { apiUrl } from "../utils/api";
 
 export const handleLogin = createAsyncThunk('user/login', async ({ username, password }, { rejectWithValue }) => {
     try {
-        const response = await fetch('https://mad4movies.onrender.com/auth/login', {
+        const response = await fetch(apiUrl('/auth/login'), {
             method: "POST",
             body: JSON.stringify({ username, password }),
             headers: { 'Content-Type': 'application/json' }
@@ -27,7 +28,7 @@ export const saveUserDetails = createAsyncThunk(
     'user/updateData',
     async ({ id, userData }, { rejectWithValue }) => {
         try {
-            const response = await fetch(`https://mad4movies.onrender.com/user/update/${id}`, {
+            const response = await fetch(apiUrl(`/user/update/${id}`), {
                 method: "PUT",
                 headers: {
                     'Content-Type': 'application/json',
@@ -51,7 +52,7 @@ export const saveUserDetails = createAsyncThunk(
 
 export const handleGoogleAuth = createAsyncThunk('user/google-auth', async (_, { rejectWithValue }) => {
     try {
-        window.location.href = 'https://mad4movies.onrender.com/auth/google';
+        window.location.href = apiUrl('/auth/google');
     } catch (error) {
         return rejectWithValue(error.message);
     }
@@ -59,7 +60,7 @@ export const handleGoogleAuth = createAsyncThunk('user/google-auth', async (_, {
 
 export const handleSignup = createAsyncThunk('user/signup', async ({ username, password, name, email }, { dispatch, rejectWithValue }) => {
     try {
-        const response = await fetch('https://mad4movies.onrender.com/auth/signup', {
+        const response = await fetch(apiUrl('/auth/signup'), {
             method: "POST",
             body: JSON.stringify({ name, username, email, password }),
             headers: { 'Content-Type': 'application/json' },
