@@ -14,7 +14,6 @@ const { generateToken, jwtAuthMiddleware } = require('./jwt'); // Import jwtAuth
 
 const cors = require('cors');
 
-// Frontends allowed to call this API. FRONTEND_URL adds one more (e.g. a preview deploy).
 const allowedOrigins = [
     'http://localhost:5173',
     'https://mad4movies.vercel.app',
@@ -23,8 +22,6 @@ const allowedOrigins = [
 
 const corsOptions = {
     origin(origin, callback) {
-        // Requests without an Origin header (curl, server-to-server) are allowed.
-        // Unknown origins get no CORS headers, so the browser blocks them.
         callback(null, !origin || allowedOrigins.includes(origin));
     },
     credentials: true,
@@ -37,18 +34,27 @@ app.use(passport.initialize());
 // Remove passport.session() since we're using tokens
 // app.use(passport.session());
 
-// Google OAuth Routes
-app.get('/auth/google', passport.authenticate('google', {
-    scope: ['profile', 'email'],
-    session: false // Disable sessions
-}));
+function resolveFrontendReturnUrl(candidate) {
+    if (candidate && allowedOrigins.includes(candidate)) {
+        return candidate;
+    }
+    return process.env.FRONTEND_URL || 'https://mad4movies.vercel.app';
+}
 
-// Updated Google callback route
+app.get('/auth/google', (req, res, next) => {
+    passport.authenticate('google', {
+        scope: ['profile', 'email'],
+        session: false,
+        state: resolveFrontendReturnUrl(req.query.returnTo),
+    })(req, res, next);
+});
+
 app.get('/auth/google/callback',
     passport.authenticate('google', { session: false }),
     (req, res) => {
-        const token = generateToken(req.user); // Generate JWT
-        res.redirect(`https://mad4movies.vercel.app?token=${token}`); 
+        const token = generateToken(req.user);
+        const returnTo = resolveFrontendReturnUrl(req.query.state);
+        res.redirect(`${returnTo}?token=${encodeURIComponent(token)}`);
     }
 );
 

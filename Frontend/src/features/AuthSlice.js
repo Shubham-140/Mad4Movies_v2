@@ -52,7 +52,7 @@ export const saveUserDetails = createAsyncThunk(
 
 export const handleGoogleAuth = createAsyncThunk('user/google-auth', async (_, { rejectWithValue }) => {
     try {
-        window.location.href = apiUrl('/auth/google');
+        window.location.href = apiUrl(`/auth/google?returnTo=${encodeURIComponent(window.location.origin)}`);
     } catch (error) {
         return rejectWithValue(error.message);
     }
