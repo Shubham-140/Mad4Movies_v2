@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { apiUrl } from "../utils/api";
 
 const initialState = {
     reviews: {},
@@ -20,7 +21,7 @@ export const fetchReviews = createAsyncThunk(
     "reviews/fetchReviews",
     async (movieId, { rejectWithValue }) => {
         try {
-            const response = await fetch(`/reviews/${movieId}`);
+            const response = await fetch(apiUrl(`/reviews/${movieId}`));
             const data = await handleFetchResponse(response);
             return { movieId, reviews: data.reviews || [] };
         } catch (err) {
@@ -34,7 +35,7 @@ export const createReview = createAsyncThunk(
     async ({ movieId, review }, { getState, rejectWithValue }) => {
         try {
             const { currentUser } = getState().auth;
-            const response = await fetch("/reviews/create", {
+            const response = await fetch(apiUrl("/reviews/create"), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -58,7 +59,7 @@ export const updateReviewText = createAsyncThunk(
     "reviews/updateReviewText",
     async ({ reviewId, newReview }, { rejectWithValue }) => {
         try {
-            const response = await fetch(`/reviews/update/review/${reviewId}`, {
+            const response = await fetch(apiUrl(`/reviews/update/review/${reviewId}`), {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -78,7 +79,7 @@ export const toggleReviewReaction = createAsyncThunk(
     async ({ reviewId, action }, { getState, rejectWithValue }) => {
         try {
             const { currentUser } = getState().auth;
-            const response = await fetch(`/reviews/update/like/${reviewId}`, {
+            const response = await fetch(apiUrl(`/reviews/update/like/${reviewId}`), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -100,7 +101,7 @@ export const deleteReview = createAsyncThunk(
     "reviews/deleteReview",
     async (reviewId, { rejectWithValue }) => {
         try {
-            const response = await fetch(`/reviews/delete/${reviewId}`, {
+            const response = await fetch(apiUrl(`/reviews/delete/${reviewId}`), {
                 method: "DELETE"
             });
             await handleFetchResponse(response);
@@ -236,7 +237,7 @@ const reviewsSlice = createSlice({
 export const selectReviewsByMovieId = (state, movieId) => 
     state.reviews?.reviews?.[movieId] || {};
 
-export const selectReviewStatus = (state) => state.reviews.status;
-export const selectReviewError = (state) => state.reviews.error;
+export const selectReviewStatus = (state) => state.reviews?.status;
+export const selectReviewError = (state) => state.reviews?.error;
 
 export default reviewsSlice.reducer;
