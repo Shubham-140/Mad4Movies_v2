@@ -24,9 +24,9 @@ function App() {
       if (!currentUser) {
         return;
       }
-      dispatch(loadAllFavorites(currentUser.favorites));
-      dispatch(loadAllWatchList(currentUser.watchList));
-      dispatch(loadAllWatched(currentUser.watched));
+      dispatch(loadAllFavorites(currentUser.favorites || []));
+      dispatch(loadAllWatchList(currentUser.watchList || []));
+      dispatch(loadAllWatched(currentUser.watched || []));
     }, [currentUser, dispatch]);
 
   useEffect(() => {
@@ -36,7 +36,12 @@ function App() {
     fetch(apiUrl("/auth/me"), {
       headers: { Authorization: `Bearer ${parsedToken}` }
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`auth/me failed: ${res.status}`);
+        }
+        return res.json();
+      })
       .then(user => {
         dispatch(setCurrentUser(user));
         dispatch(setIsLoggedIn(true));
