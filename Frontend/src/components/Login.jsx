@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   handleGoogleAuth,
@@ -15,7 +15,6 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showSomethingWrong, setShowSomethingWrong] = useState(false);
-  const navigate = useNavigate();
   const [showIncorrectCredentials, setShowIncorrectCredentials] =
     useState(false);
   const [windowSize, setWindowSize] = useState({
@@ -79,12 +78,6 @@ const Login = () => {
   function handleShowSignUpWindow() {
     dispatch(setLoginWindow(false));
     dispatch(setSignupWindow(true));
-  }
-
-  function handleForgetPass() {
-    sessionStorage.setItem("authflow", "true");
-    navigate("/username-verify");
-    dispatch(setLoginWindow(false));
   }
 
   const styles = {
@@ -316,36 +309,9 @@ const Login = () => {
           </div>
 
           <div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <label htmlFor="password" style={styles.inputLabel}>
-                Password
-              </label>
-              <Link
-                to="#"
-                style={{
-                  fontSize: isSmallMobile
-                    ? "13px"
-                    : isMediumMobile
-                    ? "14px"
-                    : isLargeMobile
-                    ? "14px"
-                    : isXLargeMobile
-                    ? "15px"
-                    : "14px",
-                  color: lightMode ? "#3b82f6" : "#60a5fa",
-                  textDecoration: "none",
-                }}
-                onClick={handleForgetPass}
-              >
-                Forgot password?
-              </Link>
-            </div>
+            <label htmlFor="password" style={styles.inputLabel}>
+              Password
+            </label>
             <input
               id="password"
               type="password"

@@ -41,11 +41,6 @@ const UserProfile = lazy(() => import("./components/UserProfile.jsx"));
 const AuthError = lazy(() => import("./components/AuthError.jsx"));
 const Blog = lazy(() => import("./components/Blog.jsx"));
 const Cookies = lazy(() => import("./components/Cookies.jsx"));
-const EmailVerification = lazy(() =>
-  import("./components/EmailVerification.jsx")
-);
-const ResetPassword = lazy(() => import("./components/ResetPassword.jsx"));
-const CheckInbox = lazy(() => import("./components/CheckInbox.jsx"));
 const Settings = lazy(() => import("./components/Settings.jsx"));
 const queryClient = new QueryClient();
 
@@ -215,30 +210,6 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<FullScreenLoader />}>
             <Cookies />
-          </Suspense>
-        ),
-      },
-      {
-        path: "/email-verify",
-        element: (
-          <Suspense fallback={<FullScreenLoader />}>
-            <EmailVerification />
-          </Suspense>
-        ),
-      },
-      {
-        path: "/check-inbox",
-        element: (
-          <Suspense fallback={<FullScreenLoader />}>
-            <CheckInbox />
-          </Suspense>
-        ),
-      },
-      {
-        path: "/reset-password",
-        element: (
-          <Suspense fallback={<FullScreenLoader />}>
-            <ResetPassword />
           </Suspense>
         ),
       },
