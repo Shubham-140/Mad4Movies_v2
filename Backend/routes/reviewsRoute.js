@@ -100,7 +100,7 @@ router.delete('/delete/:reviewId', async (req, res) => {
 
 router.post('/create', async (req, res) => {
     try {
-        const { userId, movieId, review } = req.body;
+        const { userId, movieId, review, name } = req.body;
 
         if (!userId || !movieId || !review) {
             return res.status(400).json({ error: "Missing required fields (userId, movieId, review)" });
@@ -109,8 +109,8 @@ router.post('/create', async (req, res) => {
         const newReview = new Reviews({
             userId,
             movieId,
-            review
-            // reviewId will auto-generate if set in schema
+            review,
+            name: typeof name === "string" ? name.trim() : ""
         });
 
         await newReview.save();
