@@ -2,6 +2,8 @@ import MovieCard from "./MovieCard";
 import { useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
+import { applyMovieFilters } from "../utils/movieFilters";
+import { useMovieFilters } from "../utils/useMovieFilters";
 
 function MovieCards({
   type,
@@ -18,24 +20,10 @@ function MovieCards({
   const loadMoreRef = useRef(null); 
   const lightMode = useSelector((state) => state.color.isDarkMode);
 
-  const runtime = useSelector((state) => state.movieDetails.runtime);
-  const rating = useSelector((state) => state.movieDetails.rating);
-  const genreList = useSelector((state) => state.movieDetails.genreList);
-  const selectedYear = useSelector((state) => state.movieDetails.selectedYear);
-  const [genre, setGenre] = useState([]);
-  const sortBy = useSelector((state) => state.movieDetails.sort);
-  const showMovie = useSelector((state) => state.movieDetails.showMovie);
-  const watched = useSelector((state) => state.movieDetails.watched);
-  const selectedGenre = useSelector(
-    (state) => state.movieDetails.selectedGenre
-  );
+  const filters = useMovieFilters();
 
   const windowWidth = window.innerWidth;
   const isMobile = windowWidth <= 768;
-
-  useEffect(() => {
-    setGenre(selectedGenre?.map((name) => genreList?.[name]).filter(Boolean));
-  }, [genreList, selectedGenre]);
 
   useEffect(() => {
     setMovies([]);
@@ -48,13 +36,7 @@ function MovieCards({
     trending,
     discover,
     sort,
-    sortBy,
-    rating,
-    runtime,
-    genre,
-    selectedYear,
-    showMovie,
-    watched,
+    filters,
   ]);
 
   async function fetchMovies(pageToFetch) {
@@ -80,41 +62,7 @@ function MovieCards({
         return;
       }
 
-      filteredMovies = data.filter((movie) => {
-        return (
-          (!genre.length || movie.genre_ids.some((g) => genre.includes(g))) &&
-          (!rating[0] || movie.vote_average >= Number(rating[0])) &&
-          (!rating[1] || movie.vote_average <= Number(rating[1])) &&
-          (!runtime[0] || movie.runtime >= Number(runtime[0])) &&
-          (!runtime[1] || movie.runtime <= Number(runtime[1])) &&
-          (!selectedYear[0] ||
-            movie.release_date.slice(0, 4) >= Number(selectedYear[0])) &&
-          (!selectedYear[1] ||
-            movie.release_date.slice(0, 4) <= Number(selectedYear[1]))
-        );
-      });
-
-      if (sortBy === "Release Date (Asc)") {
-        filteredMovies.sort(
-          (a, b) => new Date(a.release_date) - new Date(b.release_date)
-        );
-      } else if (sortBy === "Release Date (Desc)") {
-        filteredMovies.sort(
-          (a, b) => new Date(b.release_date) - new Date(a.release_date)
-        );
-      } else if (sortBy === "Rating") {
-        filteredMovies.sort((a, b) => b.vote_average - a.vote_average);
-      }
-
-      if (showMovie === "Seen") {
-        filteredMovies = filteredMovies.filter((movie) =>
-          watched.includes(movie.id)
-        );
-      } else if (showMovie === "Unseen") {
-        filteredMovies = filteredMovies.filter(
-          (movie) => !watched.includes(movie.id)
-        );
-      }
+      filteredMovies = applyMovieFilters(data, filters);
 
       setMovies((prev) => {
         const existingIds = new Set(prev.map((movie) => movie.id));

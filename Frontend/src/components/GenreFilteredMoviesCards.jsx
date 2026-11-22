@@ -1,19 +1,17 @@
 import { useSelector } from "react-redux";
 import Filters from "./Filters";
 import MovieCard from "./MovieCard";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams } from "react-router-dom";
+import { tmdbApiUrl } from "../utils/tmdb";
+import { applyMovieFilters } from "../utils/movieFilters";
+import { useMovieFilters } from "../utils/useMovieFilters";
 
 function GenreFilteredMoviesCards() {
   const lightMode = useSelector((state) => state.color.isDarkMode);
-  const [list, setList] = useState([]);
+  const [movies, setMovies] = useState([]);
   const genreList = useSelector((state) => state.movieDetails.genreList);
-  const runtime = useSelector((state) => state.movieDetails.runtime);
-  const selectedYear = useSelector((state) => state.movieDetails.selectedYear);
-  const sortBy = useSelector((state) => state.movieDetails.sort);
-  const rating = useSelector((state) => state.movieDetails.rating);
-  const showMovie = useSelector((state) => state.movieDetails.showMovie);
-  const watched = useSelector((state) => state.movieDetails.watched);
+  const filters = useMovieFilters();
   const { genreId } = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
@@ -37,82 +35,44 @@ function GenreFilteredMoviesCards() {
   const id = Number(genreId);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchData = async () => {
-      setIsLoading(true); 
+      setIsLoading(true);
       try {
-        const response = await fetch(
-          `https://api.themoviedb.org/3/discover/movie?api_key=${
-            import.meta.env.VITE_TMDB_API_KEY
-          }&with_genres=${id}`
-        );
-        const data = await response.json();
-        let allMovies = data?.results || [];
+        const response = await fetch(tmdbApiUrl(`/discover/movie?with_genres=${id}`));
+        const data = response.ok ? await response.json() : null;
+        const allMovies = data?.results || [];
 
         const moviesWithRuntime = await Promise.all(
           allMovies.map(async (movie) => {
-            const detailsRes = await fetch(
-              `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${
-                import.meta.env.VITE_TMDB_API_KEY
-              }`
-            );
-            const detailsData = await detailsRes.json();
-            return { ...movie, runtime: detailsData.runtime || 0 };
+            try {
+              const detailsRes = await fetch(tmdbApiUrl(`/movie/${movie.id}`));
+              const detailsData = detailsRes.ok ? await detailsRes.json() : null;
+              return { ...movie, runtime: detailsData?.runtime || 0 };
+            } catch {
+              return { ...movie, runtime: 0 };
+            }
           })
         );
 
-        let filteredMovies = moviesWithRuntime.filter((movie) => {
-          return (
-            (!rating[0] || movie.vote_average >= Number(rating[0])) &&
-            (!rating[1] || movie.vote_average <= Number(rating[1])) &&
-            (!runtime[0] || movie.runtime >= Number(runtime[0])) &&
-            (!runtime[1] || movie.runtime <= Number(runtime[1])) &&
-            (!selectedYear[0] ||
-              (movie.release_date &&
-                movie.release_date.slice(0, 4) >= Number(selectedYear[0]))) &&
-            (!selectedYear[1] ||
-              (movie.release_date &&
-                movie.release_date.slice(0, 4) <= Number(selectedYear[1])))
-          );
-        });
-
-        if (sortBy === "Release Date (Asc)") {
-          filteredMovies.sort(
-            (a, b) =>
-              new Date(a.release_date || "1900-01-01") -
-              new Date(b.release_date || "1900-01-01")
-          );
-        } else if (sortBy === "Release Date (Desc)") {
-          filteredMovies.sort(
-            (a, b) =>
-              new Date(b.release_date || "1900-01-01") -
-              new Date(a.release_date || "1900-01-01")
-          );
-        } else if (sortBy === "Rating") {
-          filteredMovies.sort(
-            (a, b) => (b.vote_average || 0) - (a.vote_average || 0)
-          );
-        }
-
-        if (showMovie === "Seen") {
-          filteredMovies = filteredMovies.filter((movie) =>
-            watched.includes(movie.id)
-          );
-        } else if (showMovie === "Unseen") {
-          filteredMovies = filteredMovies.filter(
-            (movie) => !watched.includes(movie.id)
-          );
-        }
-
-        setList(filteredMovies);
+        if (!cancelled) setMovies(moviesWithRuntime);
       } catch {
-        console.log("");
+        if (!cancelled) setMovies([]);
       } finally {
-        setIsLoading(false); 
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [id, runtime, selectedYear, rating, sortBy, watched, showMovie]);
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  const list = useMemo(
+    () => applyMovieFilters(movies, { ...filters, genre: [] }),
+    [movies, filters]
+  );
 
   const genreName = Object.keys(genreList).find((key) => genreList[key] === id);
 
