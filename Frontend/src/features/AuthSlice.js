@@ -15,12 +15,11 @@ export const handleLogin = createAsyncThunk('user/login', async ({ username, pas
 
         const data = await response.json();
         const token = data?.token;
-        console.log(data?.user);
         localStorage.setItem('auth_token', JSON.stringify(token));
         return data?.user;
     } catch (error) {
         localStorage.removeItem('auth_token');
-        rejectWithValue(error);
+        return rejectWithValue(error);
     }
 })
 
@@ -78,7 +77,7 @@ export const handleSignup = createAsyncThunk('user/signup', async ({ username, p
             password
         }))
     } catch (error) {
-        rejectWithValue(error);
+        return rejectWithValue(error);
     }
 })
 
@@ -87,7 +86,6 @@ const initialState = {
     showPopup: false,
     loginWindow: false,
     signupWindow: false,
-    resetEmail: '',
     userMenuSelected: false,
     currentUser: null,
     loading: false,
@@ -110,33 +108,8 @@ export const AuthSlice = createSlice({
         setSignupWindow: (state, action) => {
             state.signupWindow = action.payload;
         },
-        setResetEmail: (state, action) => {
-            state.resetEmail = action.payload;
-        },
         setUserMenuSelected: (state, action) => {
             state.userMenuSelected = action.payload;
-        },
-        extraReducerLogin: (builder) => {
-            builder
-                .addCase(handleLogin.pending, (state) => {
-                    state.loading = true;
-                    state.error = null;
-                })
-                .addCase(handleLogin.fulfilled, (state, action) => {
-                    state.currentUser = action.payload;
-                    state.loading = true;
-                    state.manualLogin = true;
-                })
-                .addCase(handleLogin.rejected, (state, action) => {
-                    state.error = action.payload;
-                    state.loading = false;
-                })
-                .addCase(saveUserDetails.fulfilled, (state, action) => {
-                    state.currentUser = {
-                        ...state.currentUser,
-                        ...action.payload 
-                    };
-                })
         },
         setCurrentUser: (state, action) => {
             state.currentUser = action.payload;
@@ -148,8 +121,30 @@ export const AuthSlice = createSlice({
                 state.currentUser = null;
             }
         },
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(handleLogin.pending, (state) => {
+                state.loading = true;
+                state.error = false;
+            })
+            .addCase(handleLogin.fulfilled, (state, action) => {
+                state.currentUser = action.payload;
+                state.isLoggedIn = true;
+                state.loading = false;
+            })
+            .addCase(handleLogin.rejected, (state, action) => {
+                state.error = action.payload || true;
+                state.loading = false;
+            })
+            .addCase(saveUserDetails.fulfilled, (state, action) => {
+                state.currentUser = {
+                    ...state.currentUser,
+                    ...action.payload
+                };
+            });
     }
 })
 
-export const { setShowPopup, setLoginWindow, setIsLoggedIn, setSignupWindow, setResetEmail, setUserMenuSelected, setCurrentUser, handleLogout } = AuthSlice.actions;
+export const { setShowPopup, setLoginWindow, setIsLoggedIn, setSignupWindow, setUserMenuSelected, setCurrentUser, handleLogout } = AuthSlice.actions;
 export default AuthSlice.reducer; 
