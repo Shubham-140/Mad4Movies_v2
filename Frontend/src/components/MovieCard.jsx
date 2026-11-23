@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import { useDispatch } from "react-redux";
 import { setMovieId, setRecentlyViewed } from "../features/MovieDetailsSlice";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +13,7 @@ function MovieCard({
   movies, 
   lightMode, 
   containerWidth, 
-  isMobile 
+  isMobile = false
 }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -231,29 +230,5 @@ function MovieCard({
     </div>
   );
 }
-
-MovieCard.propTypes = {
-  title: PropTypes.string.isRequired,
-  date: PropTypes.string.isRequired,
-  rating: PropTypes.number.isRequired,
-  image: PropTypes.string,
-  index: PropTypes.number.isRequired,
-  movies: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      title: PropTypes.string.isRequired,
-      genre_ids: PropTypes.arrayOf(PropTypes.number),
-      release_date: PropTypes.string,
-      rating: PropTypes.number,
-    })
-  ).isRequired,
-  lightMode: PropTypes.bool.isRequired,
-  containerWidth: PropTypes.number,
-  isMobile: PropTypes.bool,
-};
-
-MovieCard.defaultProps = {
-  isMobile: false,
-};
 
 export default MovieCard;

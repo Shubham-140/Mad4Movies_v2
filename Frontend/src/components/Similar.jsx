@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import MovieCardHome from "./MovieCardHome";
-import PropTypes from "prop-types";
 
 function Similar({ id }) {
   const lightMode = useSelector((state) => state.color.isDarkMode);
@@ -199,9 +198,5 @@ function Similar({ id }) {
     </div>
   );
 }
-
-Similar.propTypes = {
-  id: PropTypes.number.isRequired,
-};
 
 export default Similar;

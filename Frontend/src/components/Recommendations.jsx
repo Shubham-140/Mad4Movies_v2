@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import PropTypes from "prop-types";
 import MovieCardHome from "./MovieCardHome";
 
 function Recommendations({ id }) {
@@ -200,9 +199,5 @@ function Recommendations({ id }) {
     </div>
   );
 }
-
-Recommendations.propTypes = {
-  id: PropTypes.number.isRequired,
-};
 
 export default Recommendations;

@@ -1,7 +1,6 @@
 import { useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setShowShare } from "../features/MovieDetailsSlice";
-import PropTypes from "prop-types";
 import X_DarkMode from "../img/X_DarkMode.jpg";
 import X_LightMode from "../img/X_LightMode.jpg";
 import { useMediaQuery } from "react-responsive";
@@ -571,13 +570,6 @@ const Share = ({ shareBtnRef }) => {
       </style>
     </div>
   );
-};
-
-Share.propTypes = {
-  shareBtnRef: PropTypes.oneOfType([
-    PropTypes.func,
-    PropTypes.shape({ current: PropTypes.any }),
-  ]),
 };
 
 export default Share;

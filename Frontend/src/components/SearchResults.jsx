@@ -1,6 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef } from "react";
-import PropTypes from "prop-types";
 import { setMovie, setRecentlyViewed } from "../features/MovieDetailsSlice";
 import { useNavigate } from "react-router-dom";
 import slugify from "slugify";
@@ -208,29 +207,6 @@ const SearchResults = ({
       </ul>
     </div>
   );
-};
-
-SearchResults.propTypes = {
-  searchResults: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      title: PropTypes.string.isRequired,
-      poster_path: PropTypes.string,
-      release_date: PropTypes.string,
-      vote_average: PropTypes.number,
-      overview: PropTypes.string,
-      genre_ids: PropTypes.array,
-    })
-  ).isRequired,
-  activeIndex: PropTypes.number.isRequired,
-  setActiveIndex: PropTypes.func.isRequired,
-  setShowSearchBar: PropTypes.func.isRequired,
-  searchRef: PropTypes.shape({ current: PropTypes.any }),
-  isMobile: PropTypes.bool,
-  showMobileSearchBar: PropTypes.bool,
-  isTablet: PropTypes.bool,
-  isLoggedIn: PropTypes.bool,
-  setShowMobileSearchBar: PropTypes.func,
 };
 
 export default SearchResults;

@@ -1,7 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { setLoginWindow } from "../features/AuthSlice";
 import { useState } from "react";
-import PropTypes from "prop-types";
 
 function LoginButton({ isTablet, heightReduced }) {
   const lightMode = useSelector((state) => state.color.isDarkMode);
@@ -99,10 +98,5 @@ function LoginButton({ isTablet, heightReduced }) {
     </div>
   );
 }
-
-LoginButton.propTypes = {
-  isTablet: PropTypes.bool,
-  heightReduced: PropTypes.bool,
-};
 
 export default LoginButton;

@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import PropTypes from "prop-types";
 import { useDispatch, useSelector } from "react-redux";
 import { FiStar } from "react-icons/fi";
 import { FaPlay, FaPlus, FaInfoCircle } from "react-icons/fa";
@@ -447,15 +446,5 @@ function MovieCardHome({
     </div>
   );
 }
-
-MovieCardHome.propTypes = {
-  upcoming: PropTypes.bool,
-  trending: PropTypes.bool,
-  week: PropTypes.bool,
-  nowPlaying: PropTypes.bool,
-  recommendations: PropTypes.bool,
-  ID: PropTypes.number,
-  similar: PropTypes.bool,
-};
 
 export default MovieCardHome;

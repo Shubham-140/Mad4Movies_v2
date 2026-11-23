@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import { useRef, useEffect, useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
@@ -187,12 +186,6 @@ const Sidebar = ({ setOpenSidebar, openSidebar, sidebarRef }) => {
       )}
     </NavLink>
   );
-
-  NavLinkItem.propTypes = {
-    path: PropTypes.string.isRequired,
-    icon: PropTypes.string.isRequired,
-    label: PropTypes.string.isRequired,
-  };
 
   return (
     <AnimatePresence>
@@ -621,11 +614,5 @@ const overlayStyle = (openSidebar) => ({
   transition: "background 0.3s linear, backdrop-filter 0.3s linear",
   pointerEvents: openSidebar ? "auto" : "none",
 });
-
-Sidebar.propTypes = {
-  setOpenSidebar: PropTypes.func.isRequired,
-  openSidebar: PropTypes.bool.isRequired,
-  sidebarRef: PropTypes.shape({ current: PropTypes.any }),
-};
 
 export default Sidebar;

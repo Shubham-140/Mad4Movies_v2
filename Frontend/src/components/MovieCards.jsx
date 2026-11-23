@@ -1,14 +1,13 @@
 import MovieCard from "./MovieCard";
 import FullScreenLoader from "./FullScreenLoader";
 import { useEffect, useState, useRef } from "react";
-import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
 import { applyMovieFilters } from "../utils/movieFilters";
 import { useMovieFilters } from "../utils/useMovieFilters";
 
 function MovieCards({
   type,
-  isGridLayout,
+  isGridLayout = false,
   containerWidth,
   discover,
   trending,
@@ -211,18 +210,5 @@ function MovieCards({
     </div>
   );
 }
-
-MovieCards.propTypes = {
-  isGridLayout: PropTypes.bool,
-  containerWidth: PropTypes.number,
-  type: PropTypes.string.isRequired,
-  trending: PropTypes.bool,
-  discover: PropTypes.bool,
-  sort: PropTypes.string,
-};
-
-MovieCards.defaultProps = {
-  isGridLayout: false,
-};
 
 export default MovieCards;

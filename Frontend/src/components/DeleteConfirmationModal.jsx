@@ -1,7 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { deleteReview } from "../features/ReviewSlice";
 import { useEffect, useRef, useState } from "react";
-import PropTypes from 'prop-types'
 
 function DeleteConfirmationModal({ reviewIdToSend, setConfirmDeleteReview }) {
   const lightMode = useSelector((state) => state.color.isDarkMode);
@@ -234,10 +233,5 @@ function DeleteConfirmationModal({ reviewIdToSend, setConfirmDeleteReview }) {
     </div>
   );
 }
-
-DeleteConfirmationModal.propTypes = {
-  reviewIdToSend: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  setConfirmDeleteReview: PropTypes.func.isRequired,
-};
 
 export default DeleteConfirmationModal;

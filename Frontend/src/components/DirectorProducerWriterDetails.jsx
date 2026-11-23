@@ -1,6 +1,5 @@
 import { useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import { setArtist } from "../features/MovieDetailsSlice";
 import slugify from "slugify";
@@ -388,10 +387,6 @@ const DirectorProducerWriterDetails = ({ id }) => {
       </div>
     </div>
   );
-};
-
-DirectorProducerWriterDetails.propTypes = {
-  id: PropTypes.number.isRequired,
 };
 
 export default DirectorProducerWriterDetails;
