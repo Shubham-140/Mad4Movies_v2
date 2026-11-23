@@ -1,8 +1,13 @@
 const jwt = require('jsonwebtoken');
 
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET is not set');
+}
+
 const generateToken = (userData) => {
     const id = userData._id;
-    return jwt.sign({ userId: id, isVerified: userData.isVerified }, '12345', { expiresIn: '90d' })
+    return jwt.sign({ userId: id, isVerified: userData.isVerified }, JWT_SECRET, { expiresIn: '90d' })
 }
 
 const jwtAuthMiddleware = (req, res, next) => {
@@ -14,7 +19,7 @@ const jwtAuthMiddleware = (req, res, next) => {
     const token = authHeader.split(' ')[1];
     
     try {
-        const decoded = jwt.verify(token, '12345');
+        const decoded = jwt.verify(token, JWT_SECRET);
         
         req.user = {
             id: decoded.userId, 
