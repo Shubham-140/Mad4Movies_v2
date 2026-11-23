@@ -5,6 +5,7 @@ const initialState = {
     reviews: {},
     status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
+    reactionSnapshots: {},
 };
 
 // Helper function to handle fetch responses
@@ -35,6 +36,12 @@ export const createReview = createAsyncThunk(
     async ({ movieId, review }, { getState, rejectWithValue }) => {
         try {
             const { currentUser } = getState().auth;
+            if (!currentUser?._id) {
+                return rejectWithValue({ error: "You must be logged in to comment" });
+            }
+            if (!movieId) {
+                return rejectWithValue({ error: "Missing movie id" });
+            }
             const response = await fetch(apiUrl("/reviews/create"), {
                 method: "POST",
                 headers: {
@@ -42,9 +49,9 @@ export const createReview = createAsyncThunk(
                 },
                 body: JSON.stringify({
                     userId: currentUser._id,
-                    movieId,
+                    movieId: Number(movieId),
                     review,
-                    name: currentUser.name
+                    name: currentUser.name || ""
                 }),
             });
             const data = await handleFetchResponse(response);
@@ -79,6 +86,9 @@ export const toggleReviewReaction = createAsyncThunk(
     async ({ reviewId, action }, { getState, rejectWithValue }) => {
         try {
             const { currentUser } = getState().auth;
+            if (!currentUser?._id) {
+                return rejectWithValue({ error: "You must be logged in to react" });
+            }
             const response = await fetch(apiUrl(`/reviews/update/like/${reviewId}`), {
                 method: "POST",
                 headers: {
@@ -89,11 +99,15 @@ export const toggleReviewReaction = createAsyncThunk(
                     action
                 }),
             });
-            await handleFetchResponse(response);
-            return { reviewId, userId: currentUser._id, action };
+            return await handleFetchResponse(response);
         } catch (err) {
             return rejectWithValue(err);
         }
+    },
+    {
+        getPendingMeta: (_, { getState }) => ({
+            userId: getState().auth.currentUser?._id
+        })
     }
 );
 
@@ -101,6 +115,9 @@ export const deleteReview = createAsyncThunk(
     "reviews/deleteReview",
     async (reviewId, { rejectWithValue }) => {
         try {
+            if (!reviewId) {
+                return rejectWithValue({ error: "Missing review id" });
+            }
             const response = await fetch(apiUrl(`/reviews/delete/${reviewId}`), {
                 method: "DELETE"
             });
@@ -111,6 +128,24 @@ export const deleteReview = createAsyncThunk(
         }
     }
 );
+
+const findReview = (state, reviewId) => {
+    for (const movieId in state.reviews) {
+        if (state.reviews[movieId][reviewId]) return state.reviews[movieId][reviewId];
+    }
+    return null;
+};
+
+const applyReactionToggle = (review, userId, reactionType) => {
+    const userIdStr = String(userId);
+    const target = reactionType === "like" ? "likedBy" : "dislikedBy";
+    const opposite = reactionType === "like" ? "dislikedBy" : "likedBy";
+    const alreadyReacted = review[target].some((id) => String(id) === userIdStr);
+    review[opposite] = review[opposite].filter((id) => String(id) !== userIdStr);
+    review[target] = alreadyReacted
+        ? review[target].filter((id) => String(id) !== userIdStr)
+        : [...review[target], userId];
+};
 
 const reviewsSlice = createSlice({
     name: "reviews",
@@ -133,6 +168,7 @@ const reviewsSlice = createSlice({
                     return acc;
                 }, {});
                 state.status = "succeeded";
+                state.error = null;
             })
             .addCase(fetchReviews.rejected, (state, action) => {
                 state.status = "failed";
@@ -142,6 +178,7 @@ const reviewsSlice = createSlice({
             // Create Review
             .addCase(createReview.pending, (state) => {
                 state.status = "loading";
+                state.error = null;
             })
             .addCase(createReview.fulfilled, (state, action) => {
                 const review = action.payload;
@@ -176,40 +213,30 @@ const reviewsSlice = createSlice({
             })
 
             // Toggle Like/Dislike
+            .addCase(toggleReviewReaction.pending, (state, action) => {
+                const { reviewId, action: reactionType } = action.meta.arg;
+                const userId = action.meta.userId;
+                const review = findReview(state, reviewId);
+                if (!review || !userId) return;
+                state.reactionSnapshots[action.meta.requestId] = {
+                    reviewId,
+                    likedBy: [...review.likedBy],
+                    dislikedBy: [...review.dislikedBy]
+                };
+                applyReactionToggle(review, userId, reactionType);
+            })
             .addCase(toggleReviewReaction.fulfilled, (state, action) => {
-                const { reviewId, userId, action: reactionType } = action.payload;
-                
-                // Find the review in state
-                for (const movieId in state.reviews) {
-                    if (state.reviews[movieId][reviewId]) {
-                        const review = state.reviews[movieId][reviewId];
-                        
-                        // Handle like/dislike toggle
-                        if (reactionType === "like") {
-                            // Remove from dislikes if present
-                            review.dislikedBy = review.dislikedBy.filter(id => id !== userId);
-                            
-                            // Toggle like
-                            const likeIndex = review.likedBy.indexOf(userId);
-                            if (likeIndex === -1) {
-                                review.likedBy.push(userId);
-                            } else {
-                                review.likedBy.splice(likeIndex, 1);
-                            }
-                        } else {
-                            // Remove from likes if present
-                            review.likedBy = review.likedBy.filter(id => id !== userId);
-                            
-                            // Toggle dislike
-                            const dislikeIndex = review.dislikedBy.indexOf(userId);
-                            if (dislikeIndex === -1) {
-                                review.dislikedBy.push(userId);
-                            } else {
-                                review.dislikedBy.splice(dislikeIndex, 1);
-                            }
-                        }
-                        break;
+                delete state.reactionSnapshots[action.meta.requestId];
+            })
+            .addCase(toggleReviewReaction.rejected, (state, action) => {
+                const snapshot = state.reactionSnapshots[action.meta.requestId];
+                if (snapshot) {
+                    const review = findReview(state, snapshot.reviewId);
+                    if (review) {
+                        review.likedBy = snapshot.likedBy;
+                        review.dislikedBy = snapshot.dislikedBy;
                     }
+                    delete state.reactionSnapshots[action.meta.requestId];
                 }
             })
 

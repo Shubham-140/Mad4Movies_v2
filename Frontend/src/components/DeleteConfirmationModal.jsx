@@ -5,7 +5,6 @@ import PropTypes from 'prop-types'
 
 function DeleteConfirmationModal({ reviewIdToSend, setConfirmDeleteReview }) {
   const lightMode = useSelector((state) => state.color.isDarkMode);
-  const movieId = useSelector((state) => state.movieDetails.movieId);
   const dispatch = useDispatch();
   const deleteModalRef = useRef();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -224,9 +223,7 @@ function DeleteConfirmationModal({ reviewIdToSend, setConfirmDeleteReview }) {
           <button
             style={styles.deleteButton}
             onClick={() => {
-              dispatch(
-                deleteReview({ movieId: movieId, reviewId: reviewIdToSend })
-              );
+              if (reviewIdToSend) dispatch(deleteReview(reviewIdToSend));
               setConfirmDeleteReview(false);
             }}
           >
@@ -239,7 +236,7 @@ function DeleteConfirmationModal({ reviewIdToSend, setConfirmDeleteReview }) {
 }
 
 DeleteConfirmationModal.propTypes = {
-  reviewIdToSend: PropTypes.number.isRequired,
+  reviewIdToSend: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   setConfirmDeleteReview: PropTypes.func.isRequired,
 };
 

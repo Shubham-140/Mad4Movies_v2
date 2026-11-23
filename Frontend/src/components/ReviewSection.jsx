@@ -7,19 +7,27 @@ import {
   toggleReviewReaction,
   deleteReview,
   selectReviewsByMovieId,
-  // selectReviewStatus,
-  // selectReviewError,
+  selectReviewError,
 } from "../features/ReviewSlice";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { useMediaQuery } from "react-responsive";
 import { setLoginWindow } from "../features/AuthSlice";
+import { useParams } from "react-router-dom";
+
+const avatarUrl = (name) =>
+  `https://dummyimage.com/150x150/000/fff.png&text=${encodeURIComponent(
+    (name?.trim()?.[0] || "?").toUpperCase()
+  )}`;
 
 function ReviewSection() {
   const dispatch = useDispatch();
   const textareaRef = useRef(null);
   const currentUser = useSelector((state) => state.auth.currentUser);
   const lightMode = useSelector((state) => state.color.isDarkMode);
-  const movieId = useSelector((state) => state.movieDetails.movieId);
+  const movieIdFromStore = useSelector((state) => state.movieDetails.movieId);
+  const { id: movieIdFromRoute } = useParams();
+  const movieId = Number(movieIdFromStore || movieIdFromRoute) || null;
+  const reviewError = useSelector(selectReviewError);
   const [confirmDeleteReview, setConfirmDeleteReview] = useState(false);
   const [review, setReview] = useState("");
   const [reviewIdToSend, setReviewIdToSend] = useState(null);
@@ -32,8 +40,6 @@ function ReviewSection() {
   const reviews = useSelector((state) =>
     selectReviewsByMovieId(state, movieId)
   );
-  // const status = useSelector(selectReviewStatus);
-  // const error = useSelector(selectReviewError);
 
   // Media queries
   const isMobile = useMediaQuery({ maxWidth: 767 });
@@ -84,20 +90,21 @@ function ReviewSection() {
     }
   }, [movieId, dispatch]);
 
-  function handlePublishReview() {
-    if (!review.trim() || !currentUser) return;
+  async function handlePublishReview() {
+    if (!currentUser?._id) {
+      dispatch(setLoginWindow(true));
+      return;
+    }
+    const reviewText = review.trim();
+    if (!reviewText || !movieId) return;
 
-    const reviewData = {
-      movieId,
-      review,
-      userId: currentUser._id,
-      name: currentUser.name,
-    };
+    const result = await dispatch(createReview({ movieId, review: reviewText }));
 
-    dispatch(createReview(reviewData));
-    setReview("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+    if (createReview.fulfilled.match(result)) {
+      setReview("");
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+      }
     }
   }
 
@@ -121,13 +128,7 @@ function ReviewSection() {
       return;
     }
 
-    dispatch(
-      toggleReviewReaction({
-        reviewId,
-        action,
-        userId: currentUser._id,
-      })
-    );
+    dispatch(toggleReviewReaction({ reviewId, action }));
   };
 
   const handleDeleteReview = (reviewId) => {
@@ -237,10 +238,7 @@ function ReviewSection() {
             }}
           >
             <img
-              src={`https://dummyimage.com/150x150/000/fff.png&text=${currentUser?.name.slice(
-                0,
-                1
-              )}`}
+              src={avatarUrl(currentUser?.name)}
               alt="User"
               style={{
                 width: `${avatarSize}px`,
@@ -336,6 +334,12 @@ function ReviewSection() {
           </div>
         </div>
 
+        {reviewError && (
+          <p style={{ color: "#ef4444", fontSize: "13px", margin: "8px 16px 0" }}>
+            {reviewError}
+          </p>
+        )}
+
         {reviews && Object.keys(reviews).length > 0 && (
           <div style={{ padding: "0 16px" }}>
             <div
@@ -368,9 +372,7 @@ function ReviewSection() {
                   }}
                 >
                   <img
-                    src={`https://dummyimage.com/150x150/000/fff.png&text=${element?.name
-                      .trim()
-                      .slice(0, 1)}`}
+                    src={avatarUrl(element?.name)}
                     alt="User"
                     style={{
                       width: `${avatarSize}px`,
@@ -763,10 +765,7 @@ function ReviewSection() {
           }}
         >
           <img
-            src={`https://dummyimage.com/150x150/000/fff.png&text=${currentUser?.name.slice(
-              0,
-              1
-            )}`}
+            src={avatarUrl(currentUser?.name)}
             alt="User"
             style={{
               width: `${avatarSize}px`,
@@ -875,6 +874,12 @@ function ReviewSection() {
         </div>
       </div>
 
+      {reviewError && (
+        <p style={{ color: "#ef4444", fontSize: "13px", margin: "8px 0 0" }}>
+          {reviewError}
+        </p>
+      )}
+
       {reviews && Object.keys(reviews).length > 0 && (
         <div
           style={{
@@ -942,9 +947,7 @@ function ReviewSection() {
                 }}
               >
                 <img
-                  src={`https://dummyimage.com/150x150/000/fff.png&text=${element.name
-                    .trim()
-                    .slice(0, 1)}`}
+                  src={avatarUrl(element?.name)}
                   alt="User"
                   style={{
                     width: `${avatarSize}px`,
