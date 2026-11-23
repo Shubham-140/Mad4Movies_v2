@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import MovieCard from "./MovieCard";
@@ -12,8 +12,6 @@ const PersonProfile = () => {
   const [socialMedia, setSocialMedia] = useState({});
   const { ID } = useParams();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const containerRef = useRef(null);
 
   const monthMap = {
     "01": "January",
@@ -37,19 +35,10 @@ const PersonProfile = () => {
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.clientWidth);
-      }
     };
     window.addEventListener("resize", handleResize);
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      setContainerWidth(containerRef.current.clientWidth);
-    }
   }, []);
 
   useEffect(() => {
@@ -97,7 +86,7 @@ const PersonProfile = () => {
         transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >
-      <div style={{ maxWidth: "1400px", margin: "0 auto" }} ref={containerRef}>
+      <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
         <div
           style={{
             display: "flex",
@@ -1279,15 +1268,13 @@ const PersonProfile = () => {
                   movies={topMovies}
                   lightMode={lightMode}
                   isMobile={isMobile}
-                  containerWidth={containerWidth}
-                  style={{
-                    flex: "0 0 auto",
-                    width: isMobile
-                      ? "120px"
+                  cardWidth={
+                    isMobile
+                      ? 120
                       : window.innerWidth < 1024
-                      ? "160px"
-                      : "180px",
-                  }}
+                      ? 160
+                      : 180
+                  }
                 />
               ))}
             </div>
