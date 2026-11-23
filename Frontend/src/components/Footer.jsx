@@ -119,6 +119,7 @@ const Footer = () => {
       <div
         style={{
           width: isMobile ? "100%" : "clamp(80%, 90vw, 95%)",
+          maxWidth: "1440px",
           margin: "0 auto",
           display: "flex",
           flexDirection: "column",

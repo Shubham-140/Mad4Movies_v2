@@ -129,7 +129,7 @@ const MovieComponent = () => {
   const heroStyles = {
     container: {
       position: "relative",
-      width: "100vw",
+      width: "100%",
       height: isMobile ? "auto" : "102.6vh",
       display: "flex",
       alignItems: isMobile ? "flex-start" : "flex-end",

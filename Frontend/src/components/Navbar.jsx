@@ -83,7 +83,7 @@ const Navbar = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: `0 ${sidePadding}`,
+        padding: `0 max(${sidePadding}, calc((100% - 1440px) / 2 + ${sidePadding}))`,
         backgroundColor: lightMode ? "#f8faff" : "#1a2232",
         height: navbarHeight,
         position: "sticky", 

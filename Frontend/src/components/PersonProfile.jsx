@@ -73,7 +73,7 @@ const PersonProfile = () => {
   return (
     <div
       style={{
-        width: "100vw",
+        width: "100%",
         minHeight: "89.6vh",
         backgroundColor: lightMode ? "#f5f7fa" : "#1a1e24",
         color: lightMode ? "#2d3748" : "white",

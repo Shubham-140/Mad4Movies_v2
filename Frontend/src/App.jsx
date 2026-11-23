@@ -117,7 +117,9 @@ function App() {
         style={{ backgroundColor: lightMode ? "#f0f4ff" : "#232A35" }}
       >
         <Navbar />
-        <Outlet />
+        <div style={{ maxWidth: "1440px", margin: "0 auto", width: "100%" }}>
+          <Outlet />
+        </div>
         <Footer />
       </div>
     </>

@@ -21,7 +21,7 @@ const More = () => {
   const getContainerWidth = () => {
     if (isMobile) return { width: "100vw" };
     if (isTablet) return { width: "40vw", maxWidth: "600px" };
-    return { width: "40vw", maxWidth: "700px" };
+    return { width: "min(40vw, 576px)" };
   };
 
   const getContainerStyles = () => {

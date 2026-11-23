@@ -139,7 +139,7 @@ function Hero() {
     <div
       style={{
         position: "relative",
-        width: "100vw",
+        width: "100%",
         height: isMobile ? "75vh" : "clamp(400px, 47vh, 800px)",
         backgroundImage: isMobile
           ? `url(https://image.tmdb.org/t/p/w1280/${goatMovies?.[index]?.poster_path})`

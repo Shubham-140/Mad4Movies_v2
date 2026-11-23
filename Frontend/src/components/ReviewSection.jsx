@@ -57,7 +57,7 @@ function ReviewSection() {
     ? "62vw"
     : isLargeTablet || is1023
     ? "60vw"
-    : "60vw";
+    : "min(60vw, 864px)";
 
   const marginLeftValue = isMobile
     ? "0"
