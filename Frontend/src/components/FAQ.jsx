@@ -5,6 +5,33 @@ import FAQSubmittedPrompt from "./FAQSubmittedPrompt";
 import { useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 
+const faqs = [
+  {
+    q: "How do I search for a movie?",
+    a: "You can search for a movie by typing its title in the search bar. Our system will fetch relevant results based on your query.",
+  },
+  {
+    q: "Can I filter movies by genre or release year?",
+    a: "Yes! You can refine your search by selecting genres, release years, or other filters available in the app.",
+  },
+  {
+    q: "Is there a way to create a personal watchlist or save favorite movies for later?",
+    a: "Absolutely! Our app allows you to create a personalized watchlist where you can save your favorite movies and access them anytime. This feature is especially useful for keeping track of movies you want to watch later. Simply click the 'Add to Watchlist' button on any movie, and it will be saved in your profile.",
+  },
+  {
+    q: "Where do you get movie data from?",
+    a: "We fetch movie details from a reliable third-party API that provides up-to-date information on films, actors, and ratings.",
+  },
+  {
+    q: "How accurate are the ratings and reviews?",
+    a: "Ratings and reviews are sourced from trusted databases and user feedback, ensuring accuracy and credibility.",
+  },
+  {
+    q: "Can I get detailed information about a movie, including cast, reviews?",
+    a: "Yes! When you search for a movie, you can click on it to view detailed information such as the plot summary, cast members, director, release year, ratings from various sources, and user reviews.",
+  },
+];
+
 function FAQ() {
   const lightMode = useSelector((state) => state.color.isDarkMode);
   const dispatch = useDispatch();
@@ -13,34 +40,7 @@ function FAQ() {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   const isMobile = useMediaQuery({ maxWidth: 767 });
-  const isSmallMobile = useMediaQuery({ maxWidth: 374 }); 
-
-  const faqs = [
-    {
-      q: "How do I search for a movie?",
-      a: "You can search for a movie by typing its title in the search bar. Our system will fetch relevant results based on your query.",
-    },
-    {
-      q: "Can I filter movies by genre or release year?",
-      a: "Yes! You can refine your search by selecting genres, release years, or other filters available in the app.",
-    },
-    {
-      q: "Is there a way to create a personal watchlist or save favorite movies for later?",
-      a: "Absolutely! Our app allows you to create a personalized watchlist where you can save your favorite movies and access them anytime. This feature is especially useful for keeping track of movies you want to watch later. Simply click the 'Add to Watchlist' button on any movie, and it will be saved in your profile.",
-    },
-    {
-      q: "Where do you get movie data from?",
-      a: "We fetch movie details from a reliable third-party API that provides up-to-date information on films, actors, and ratings.",
-    },
-    {
-      q: "How accurate are the ratings and reviews?",
-      a: "Ratings and reviews are sourced from trusted databases and user feedback, ensuring accuracy and credibility.",
-    },
-    {
-      q: "Can I get detailed information about a movie, including cast, reviews?",
-      a: "Yes! When you search for a movie, you can click on it to view detailed information such as the plot summary, cast members, director, release year, ratings from various sources, and user reviews.",
-    },
-  ];
+  const isSmallMobile = useMediaQuery({ maxWidth: 374 });
 
   useEffect(() => {
     const handleResize = () => {
