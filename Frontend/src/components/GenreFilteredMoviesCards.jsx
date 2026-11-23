@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import Filters from "./Filters";
 import MovieCard from "./MovieCard";
 import FullScreenLoader from "./FullScreenLoader";
+import EmptyState from "./EmptyState";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { tmdbApiUrl } from "../utils/tmdb";
@@ -163,19 +164,10 @@ function GenreFilteredMoviesCards() {
                   ))}
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "50vh",
-                    color: lightMode ? "#4a5568" : "#a0aec0",
-                    fontSize: "1.2rem",
-                    textAlign: "center",
-                  }}
-                >
-                </div>
+                <EmptyState
+                  title="No movies match your filters"
+                  message="Try adjusting your filters"
+                />
               )}
             </div>
           </div>
@@ -274,19 +266,10 @@ function GenreFilteredMoviesCards() {
                   ))}
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "50vh",
-                    color: lightMode ? "#4a5568" : "#a0aec0",
-                    fontSize: "1.2rem",
-                    textAlign: "center",
-                  }}
-                >
-                </div>
+                <EmptyState
+                  title="No movies match your filters"
+                  message="Try adjusting your filters"
+                />
               )}
             </div>
           </div>

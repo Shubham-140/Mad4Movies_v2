@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { useEffect, useState, useRef, useMemo } from "react";
 import MovieCard from "./MovieCard";
 import FullScreenLoader from "./FullScreenLoader";
+import EmptyState from "./EmptyState";
 import { fetchTmdbMoviesByIds } from "../utils/tmdb";
 import { applyMovieFilters } from "../utils/movieFilters";
 import { useMovieFilters } from "../utils/useMovieFilters";
@@ -136,38 +137,19 @@ function WatchList() {
                   ))}
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "50vh",
-                    color: lightMode ? "#4a5568" : "#a0aec0",
-                    fontSize: "1.2rem",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "3.5rem",
-                      marginBottom: "1rem",
-                      opacity: "0.7",
-                    }}
-                  >
-                    {watchList.length === 0 ? "📋" : "🔍"}
-                  </div>
-                  <p>
-                    {watchList.length === 0
+                <EmptyState
+                  icon={watchList.length === 0 ? "📋" : "🔍"}
+                  title={
+                    watchList.length === 0
                       ? "Your watchlist is empty"
-                      : "No movies match your filters"}
-                  </p>
-                  <p style={{ fontSize: "1rem", marginTop: "0.5rem" }}>
-                    {watchList.length === 0
+                      : "No movies match your filters"
+                  }
+                  message={
+                    watchList.length === 0
                       ? "Add movies to watch later"
-                      : "Try adjusting your filters"}
-                  </p>
-                </div>
+                      : "Try adjusting your filters"
+                  }
+                />
               )}
             </div>
           </div>
@@ -259,38 +241,19 @@ function WatchList() {
                   ))}
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "50vh",
-                    color: lightMode ? "#4a5568" : "#a0aec0",
-                    fontSize: "1.2rem",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "3.5rem",
-                      marginBottom: "1rem",
-                      opacity: "0.7",
-                    }}
-                  >
-                    {watchList.length === 0 ? "📋" : "🔍"}
-                  </div>
-                  <p>
-                    {watchList.length === 0
+                <EmptyState
+                  icon={watchList.length === 0 ? "📋" : "🔍"}
+                  title={
+                    watchList.length === 0
                       ? "Your watchlist is empty"
-                      : "No movies match your filters"}
-                  </p>
-                  <p style={{ fontSize: "1rem", marginTop: "0.5rem" }}>
-                    {watchList.length === 0
+                      : "No movies match your filters"
+                  }
+                  message={
+                    watchList.length === 0
                       ? "Add movies to watch later"
-                      : "Try adjusting your filters"}
-                  </p>
-                </div>
+                      : "Try adjusting your filters"
+                  }
+                />
               )}
             </div>
           </div>

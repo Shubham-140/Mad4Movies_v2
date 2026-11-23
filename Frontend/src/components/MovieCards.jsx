@@ -1,5 +1,6 @@
 import MovieCard from "./MovieCard";
 import FullScreenLoader from "./FullScreenLoader";
+import EmptyState from "./EmptyState";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { filterBySeen } from "../utils/movieFilters";
@@ -97,6 +98,7 @@ function MovieCards({
 
   const containerStyles = {
     display: "grid",
+    gridColumn: "1 / -1",
     position: "relative",
     minHeight: "500px",
     ...(isMobile && {
@@ -120,18 +122,6 @@ function MovieCards({
         gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
         rowGap: "60px",
       }),
-  };
-
-  const loadingStyles = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "16px",
-    color: lightMode ? "#4b5563" : "#9ca3af",
   };
 
   const loadMoreButtonStyles = {
@@ -181,42 +171,10 @@ function MovieCards({
           )}
         </>
       ) : (
-        <div
-          style={{
-            ...loadingStyles,
-            gridColumn: "1 / -1",
-            textAlign: "center",
-            padding: "40px",
-          }}
-        >
-          <p
-            style={{
-              fontSize: "20px",
-              fontWeight: 500,
-              color: lightMode ? "#374151" : "#e5e7eb",
-            }}
-          >
-            No movies found matching your criteria
-          </p>
-          <p
-            style={{
-              fontSize: "16px",
-              color: lightMode ? "#6b7280" : "#9ca3af",
-              marginTop: "8px",
-            }}
-          >
-            Try adjusting your filters
-          </p>
-          {hasMore && movies.length > 0 && (
-            <button
-              style={loadMoreButtonStyles}
-              onClick={handleLoadMore}
-              disabled={isLoading}
-            >
-              {isLoading ? "Loading..." : "Load More"}
-            </button>
-          )}
-        </div>
+        <EmptyState
+          title="No movies match your filters"
+          message="Try adjusting your filters"
+        />
       )}
     </div>
   );

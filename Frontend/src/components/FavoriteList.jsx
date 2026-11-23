@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { useEffect, useState, useRef, useMemo } from "react";
 import MovieCard from "./MovieCard";
 import FullScreenLoader from "./FullScreenLoader";
+import EmptyState from "./EmptyState";
 import { fetchTmdbMoviesByIds } from "../utils/tmdb";
 import { applyMovieFilters } from "../utils/movieFilters";
 import { useMovieFilters } from "../utils/useMovieFilters";
@@ -136,38 +137,19 @@ function FavoriteList() {
                   ))}
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "50vh",
-                    color: lightMode ? "#4a5568" : "#a0aec0",
-                    fontSize: "1.2rem",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "3.5rem",
-                      marginBottom: "1rem",
-                      opacity: "0.7",
-                    }}
-                  >
-                    {favorites.length === 0 ? "❤️" : "🔍"}
-                  </div>
-                  <p>
-                    {favorites.length === 0
+                <EmptyState
+                  icon={favorites.length === 0 ? "❤️" : "🔍"}
+                  title={
+                    favorites.length === 0
                       ? "Your favorites list is empty"
-                      : "No movies match your filters"}
-                  </p>
-                  <p style={{ fontSize: "1rem", marginTop: "0.5rem" }}>
-                    {favorites.length === 0
+                      : "No movies match your filters"
+                  }
+                  message={
+                    favorites.length === 0
                       ? "Add movies to your favorites"
-                      : "Try adjusting your filters"}
-                  </p>
-                </div>
+                      : "Try adjusting your filters"
+                  }
+                />
               )}
             </div>
           </div>
@@ -259,38 +241,19 @@ function FavoriteList() {
                   ))}
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "50vh",
-                    color: lightMode ? "#4a5568" : "#a0aec0",
-                    fontSize: "1.2rem",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "3.5rem",
-                      marginBottom: "1rem",
-                      opacity: "0.7",
-                    }}
-                  >
-                    {favorites.length === 0 ? "❤️" : "🔍"}
-                  </div>
-                  <p>
-                    {favorites.length === 0
+                <EmptyState
+                  icon={favorites.length === 0 ? "❤️" : "🔍"}
+                  title={
+                    favorites.length === 0
                       ? "Your favorites list is empty"
-                      : "No movies match your filters"}
-                  </p>
-                  <p style={{ fontSize: "1rem", marginTop: "0.5rem" }}>
-                    {favorites.length === 0
+                      : "No movies match your filters"
+                  }
+                  message={
+                    favorites.length === 0
                       ? "Add movies to your favorites"
-                      : "Try adjusting your filters"}
-                  </p>
-                </div>
+                      : "Try adjusting your filters"
+                  }
+                />
               )}
             </div>
           </div>

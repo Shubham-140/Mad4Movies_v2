@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import MovieCard from "./MovieCard";
 import FullScreenLoader from "./FullScreenLoader";
+import EmptyState from "./EmptyState";
 import Filters from "./Filters";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams } from "react-router-dom";
@@ -197,17 +198,6 @@ function MovieSearchResults() {
                   }}
                 ></span>
               </h1>
-              <p
-                style={{
-                  fontSize: "1.1rem",
-                  color: lightMode ? "#4a5568" : "#a0aec0",
-                  margin: "0",
-                  maxWidth: "600px",
-                  lineHeight: "1.6",
-                }}
-              >
-                {!isLoading && list.length === 0 && "No results found"}
-              </p>
             </div>
 
             <div style={{ position: "relative", minHeight: "500px" }}>
@@ -244,32 +234,14 @@ function MovieSearchResults() {
                   ))}
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "50vh",
-                    color: lightMode ? "#4a5568" : "#a0aec0",
-                    fontSize: "1.2rem",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "3.5rem",
-                      marginBottom: "1rem",
-                      opacity: "0.7",
-                    }}
-                  >
-                    🔍
-                  </div>
-                  <p>No results found</p>
-                  <p style={{ fontSize: "1rem", marginTop: "0.5rem" }}>
-                    Try a different search term
-                  </p>
-                </div>
+                <EmptyState
+                  title={movies.length === 0 ? "No results found" : "No movies match your filters"}
+                  message={
+                    movies.length === 0
+                      ? "Try a different search term"
+                      : "Try adjusting your filters"
+                  }
+                />
               )}
             </div>
             {loadMoreButton}
@@ -339,17 +311,6 @@ function MovieSearchResults() {
                   }}
                 ></span>
               </h1>
-              <p
-                style={{
-                  fontSize: "1.1rem",
-                  color: lightMode ? "#4a5568" : "#a0aec0",
-                  margin: "0",
-                  maxWidth: "600px",
-                  lineHeight: "1.6",
-                }}
-              >
-                {!isLoading && list.length === 0 && "No results found"}
-              </p>
             </div>
 
             <div style={{ position: "relative", minHeight: "500px" }}>
@@ -379,32 +340,14 @@ function MovieSearchResults() {
                   ))}
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "50vh",
-                    color: lightMode ? "#4a5568" : "#a0aec0",
-                    fontSize: "1.2rem",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "3.5rem",
-                      marginBottom: "1rem",
-                      opacity: "0.7",
-                    }}
-                  >
-                    🔍
-                  </div>
-                  <p>No results found</p>
-                  <p style={{ fontSize: "1rem", marginTop: "0.5rem" }}>
-                    Try a different search term
-                  </p>
-                </div>
+                <EmptyState
+                  title={movies.length === 0 ? "No results found" : "No movies match your filters"}
+                  message={
+                    movies.length === 0
+                      ? "Try a different search term"
+                      : "Try adjusting your filters"
+                  }
+                />
               )}
             </div>
             {loadMoreButton}
