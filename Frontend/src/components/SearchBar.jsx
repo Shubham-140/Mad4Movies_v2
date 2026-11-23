@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { setMovieResultData } from "../features/MovieDetailsSlice";
 import SearchResults from "./SearchResults";
+import { tmdbApiUrl } from "../utils/tmdb";
 
 function SearchBar() {
   const lightMode = useSelector((state) => state.color.isDarkMode);
@@ -93,19 +94,27 @@ function SearchBar() {
   }, [backupDisplayQuery, searchResults]);
 
   useEffect(() => {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      setSearchResults([]);
+      return;
+    }
+
+    let cancelled = false;
     function fetchSearchResults() {
-      fetch(
-        `https://api.themoviedb.org/3/search/movie?api_key=${
-          import.meta.env.VITE_TMDB_API_KEY
-        }&query=${query}`
-      )
+      fetch(tmdbApiUrl(`/search/movie?query=${encodeURIComponent(trimmedQuery)}`))
         .then((response) => response?.json())
-        .then((data) => setSearchResults(data?.results || []))
+        .then((data) => {
+          if (!cancelled) setSearchResults(data?.results || []);
+        })
         .catch(() => console.error(""));
     }
 
     const timer = setTimeout(() => fetchSearchResults(), 400);
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [query]);
 
   function handleQueryChange(e) {
