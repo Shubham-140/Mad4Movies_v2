@@ -107,7 +107,7 @@ const MovieComponent = () => {
     };
   }, [movie?.title]);
 
-  const {} = useQuery({
+  useQuery({
     queryKey: ["movie", id],
     queryFn: () =>
       fetch(
