@@ -1,9 +1,11 @@
 import MovieCard from "./MovieCard";
 import FullScreenLoader from "./FullScreenLoader";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { applyMovieFilters } from "../utils/movieFilters";
+import { filterBySeen } from "../utils/movieFilters";
 import { useMovieFilters } from "../utils/useMovieFilters";
+import { movieListPath } from "../utils/filterParams";
+import { tmdbApiUrl } from "../utils/tmdb";
 
 function MovieCards({
   type,
@@ -17,56 +19,55 @@ function MovieCards({
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const loadMoreRef = useRef(null); 
+  const loadMoreRef = useRef(null);
+  const requestId = useRef(0);
   const lightMode = useSelector((state) => state.color.isDarkMode);
 
   const filters = useMovieFilters();
+
+  const listPath = useMemo(
+    () => movieListPath({ type, trending, discover, query: sort }, filters),
+    [type, trending, discover, sort, filters]
+  );
+
+  const visibleMovies = useMemo(
+    () => filterBySeen(movies, filters.showMovie, filters.watched),
+    [movies, filters.showMovie, filters.watched]
+  );
 
   const windowWidth = window.innerWidth;
   const isMobile = windowWidth <= 768;
 
   useEffect(() => {
+    requestId.current += 1;
     setMovies([]);
     setPage(1);
     setHasMore(true);
     setIsLoading(true);
     fetchMovies(1);
-  }, [
-    type,
-    trending,
-    discover,
-    sort,
-    filters,
-  ]);
+  }, [listPath]);
 
   async function fetchMovies(pageToFetch) {
-    let filteredMovies = [];
-    let baseUrl = `https://api.themoviedb.org/3/${
-      discover
-        ? "discover/movie"
-        : trending
-        ? `trending/movie/${type}`
-        : `movie/${type}`
-    }?api_key=${import.meta.env.VITE_TMDB_API_KEY}`;
+    const currentRequest = requestId.current;
 
     try {
-      const res = await fetch(
-        `${baseUrl}&page=${pageToFetch}${sort ? `&${sort}` : ""}`
-      );
+      const res = await fetch(`${tmdbApiUrl(listPath)}&page=${pageToFetch}`);
       const response = await res.json();
+      if (currentRequest !== requestId.current) return;
       const data = response?.results || [];
 
-      if (!data.length) {
+      if (!data.length || pageToFetch >= Math.min(response.total_pages || 1, 500)) {
         setHasMore(false);
+      }
+
+      if (!data.length) {
         setIsLoading(false);
         return;
       }
 
-      filteredMovies = applyMovieFilters(data, filters);
-
       setMovies((prev) => {
         const existingIds = new Set(prev.map((movie) => movie.id));
-        const newMovies = filteredMovies.filter(
+        const newMovies = data.filter(
           (movie) => !existingIds.has(movie.id)
         );
         return [...prev, ...newMovies];
@@ -81,7 +82,7 @@ function MovieCards({
         });
       }
     } catch {
-      console.log("");
+      if (currentRequest !== requestId.current) return;
       setHasMore(false);
       setIsLoading(false);
     }
@@ -136,6 +137,7 @@ function MovieCards({
   const loadMoreButtonStyles = {
     gridColumn: "1 / -1",
     justifySelf: "center",
+    alignSelf: "start",
     padding: "10px 20px",
     margin: "20px 0",
     backgroundColor: lightMode ? "#3b82f6" : "#60a5fa",
@@ -151,9 +153,9 @@ function MovieCards({
     <div style={containerStyles}>
       {isLoading && movies.length === 0 ? (
         <FullScreenLoader />
-      ) : movies.length > 0 ? (
+      ) : visibleMovies.length > 0 ? (
         <>
-          {movies.map((elem, index) => (
+          {visibleMovies.map((elem, index) => (
             <MovieCard
               key={elem.id}
               title={elem.title}
@@ -161,7 +163,7 @@ function MovieCards({
               rating={elem.vote_average}
               image={elem.poster_path}
               index={index}
-              movies={movies}
+              movies={visibleMovies}
               lightMode={lightMode}
               containerWidth={containerWidth}
               isMobile={isMobile}
@@ -205,6 +207,15 @@ function MovieCards({
           >
             Try adjusting your filters
           </p>
+          {hasMore && movies.length > 0 && (
+            <button
+              style={loadMoreButtonStyles}
+              onClick={handleLoadMore}
+              disabled={isLoading}
+            >
+              {isLoading ? "Loading..." : "Load More"}
+            </button>
+          )}
         </div>
       )}
     </div>

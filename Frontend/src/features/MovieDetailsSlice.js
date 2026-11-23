@@ -118,6 +118,15 @@ export const MovieDetailsSlice = createSlice({
         setShowMovie: (state, action) => {
             state.showMovie = action.payload;
         },
+        setFilters: (state, action) => {
+            const { genre, runtime, rating, selectedYear, sort, showMovie } = action.payload;
+            state.selectedGenre = genre;
+            state.runtime = runtime;
+            state.rating = rating;
+            state.selectedYear = selectedYear;
+            state.sort = sort;
+            state.showMovie = showMovie;
+        },
         incrementIndex: (state) => {
             if (state.index === 5) {
                 state.index = 0;
@@ -178,5 +187,5 @@ export const MovieDetailsSlice = createSlice({
     }
 })
 
-export const { setMovie, setMovieResultData, setGenre, setRuntime1, setRuntime2, setRating1, setRating2, toggleWatchedMovies, toggleFavoriteMovies, toggleWatchList, setUserRating, setArtist, setYear1, setYear2, applySort, setSingleGenre, setShowGenre, setShowMovie, incrementIndex, decrementIndex, setRecentlyViewed, setShowShare, setMovieId, setUrlQuery, setMovieDetailsHydated, loadAllFavorites, loadAllWatchList, loadAllWatched, loadAllRecentlyViewed } = MovieDetailsSlice.actions;
+export const { setMovie, setMovieResultData, setGenre, setRuntime1, setRuntime2, setRating1, setRating2, toggleWatchedMovies, toggleFavoriteMovies, toggleWatchList, setUserRating, setArtist, setYear1, setYear2, applySort, setSingleGenre, setShowGenre, setShowMovie, setFilters, incrementIndex, decrementIndex, setRecentlyViewed, setShowShare, setMovieId, setUrlQuery, setMovieDetailsHydated, loadAllFavorites, loadAllWatchList, loadAllWatched, loadAllRecentlyViewed } = MovieDetailsSlice.actions;
 export default MovieDetailsSlice.reducer;

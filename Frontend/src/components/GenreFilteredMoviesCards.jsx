@@ -5,8 +5,9 @@ import FullScreenLoader from "./FullScreenLoader";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { tmdbApiUrl } from "../utils/tmdb";
-import { applyMovieFilters } from "../utils/movieFilters";
+import { filterBySeen } from "../utils/movieFilters";
 import { useMovieFilters } from "../utils/useMovieFilters";
+import { movieListPath } from "../utils/filterParams";
 
 function GenreFilteredMoviesCards() {
   const lightMode = useSelector((state) => state.color.isDarkMode);
@@ -35,28 +36,23 @@ function GenreFilteredMoviesCards() {
 
   const id = Number(genreId);
 
+  const listPath = useMemo(
+    () =>
+      movieListPath(
+        { discover: true, query: `with_genres=${id}` },
+        { ...filters, genre: [] }
+      ),
+    [id, filters]
+  );
+
   useEffect(() => {
     let cancelled = false;
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(tmdbApiUrl(`/discover/movie?with_genres=${id}`));
+        const response = await fetch(tmdbApiUrl(listPath));
         const data = response.ok ? await response.json() : null;
-        const allMovies = data?.results || [];
-
-        const moviesWithRuntime = await Promise.all(
-          allMovies.map(async (movie) => {
-            try {
-              const detailsRes = await fetch(tmdbApiUrl(`/movie/${movie.id}`));
-              const detailsData = detailsRes.ok ? await detailsRes.json() : null;
-              return { ...movie, runtime: detailsData?.runtime || 0 };
-            } catch {
-              return { ...movie, runtime: 0 };
-            }
-          })
-        );
-
-        if (!cancelled) setMovies(moviesWithRuntime);
+        if (!cancelled) setMovies(data?.results || []);
       } catch {
         if (!cancelled) setMovies([]);
       } finally {
@@ -68,11 +64,11 @@ function GenreFilteredMoviesCards() {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [listPath]);
 
   const list = useMemo(
-    () => applyMovieFilters(movies, { ...filters, genre: [] }),
-    [movies, filters]
+    () => filterBySeen(movies, filters.showMovie, filters.watched),
+    [movies, filters.showMovie, filters.watched]
   );
 
   const genreName = Object.keys(genreList).find((key) => genreList[key] === id);
