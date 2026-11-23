@@ -196,7 +196,6 @@ function FAQ() {
     <div style={{ position: "relative" }}>
       <div
         style={{
-          maxWidth: "1440px",
           ...getContainerStyles(),
           ...mobileStyles.container, 
           backgroundColor: lightMode ? "#f0f4ff" : "#232A35",
@@ -295,11 +294,9 @@ function FAQ() {
 
         <div
           style={{
-            width: "100%",
-            maxWidth: "1200px",
             maxHeight: isMobile ? (isSmallMobile ? "350px" : "400px") : "500px",
             overflowY: "auto",
-            marginLeft: windowWidth >= 1024 ? "20px" : "0px",
+            margin: windowWidth >= 1024 ? "0 20px" : "0",
             padding: isMobile ? (isSmallMobile ? "15px" : "20px") : "20px",
             scrollbarWidth: "thin",
             scrollbarColor: lightMode ? "#3182ce #edf2f7" : "#f6ad55 #2d3748",
@@ -400,9 +397,9 @@ function FAQ() {
                 </summary>
                 <div
                   style={{
-                    padding: `0 ${
-                      isMobile ? (isSmallMobile ? "15px" : "20px") : "25px"
-                    } ${isMobile ? (isSmallMobile ? "12px" : "15px") : "20px"}`,
+                    padding: `${
+                      isMobile ? (isSmallMobile ? "12px" : "15px") : "20px"
+                    } ${isMobile ? (isSmallMobile ? "15px" : "20px") : "25px"}`,
                     color: lightMode ? "#4a5568" : "#cbd5e0",
                     fontSize: isMobile
                       ? isSmallMobile
@@ -413,7 +410,6 @@ function FAQ() {
                     borderTop: lightMode
                       ? "1px solid rgba(226, 232, 240, 0.8)"
                       : "1px solid rgba(74, 85, 104, 0.5)",
-                    marginTop: isMobile ? "8px" : "10px",
                   }}
                 >
                   {item.a}
