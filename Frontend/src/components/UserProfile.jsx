@@ -1388,7 +1388,7 @@ const UserProfile = () => {
                 rating={elem.vote_average}
                 image={elem.poster_path}
                 index={index}
-                movies={list}
+                movies={favList}
                 lightMode={lightMode}
                 cardWidth={profileCardWidth}
               />
